@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noStrictGenericChecks": false,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "downlevelIteration": true,
+    "module": "ES6",
+    "moduleResolution": "Node",
+    "target": "ESNext",
+    "jsx": "react",
+    "lib": ["DOM", "ES2019"]
+  },
+  "include": ["src"]
+}

@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "out",
+    "lib": ["es6"],
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "rootDir": "src",
+    "strict": true
+  },
+  "exclude": ["node_modules", ".vscode-test", "src/react-ui/src"]
+}

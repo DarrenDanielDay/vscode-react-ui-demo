@@ -1,0 +1,51 @@
+{
+  "name": "vscode-react-ui-demo",
+  "displayName": "vscode-react-ui-demo",
+  "description": "A demo for creating vscode plugin with webview powered by React.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.46.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-react-ui-demo.open",
+        "title": "VSCode React UI Demo: Open Webview"
+      },
+      {
+        "command": "vscode-react-ui-demo.close",
+        "title": "VSCode React UI Demo: Close Webview"
+      },
+      {
+        "command": "vscode-react-ui-demo.reload",
+        "title": "VSCode React UI Demo: Reload Webview"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.0.4",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.46.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "eslint": "^7.19.0",
+    "glob": "^7.1.6",
+    "mocha": "^8.2.1",
+    "typescript": "^4.1.3",
+    "vscode-test": "^1.5.0"
+  }
+}
