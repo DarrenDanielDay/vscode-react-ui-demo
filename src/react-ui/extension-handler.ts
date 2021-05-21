@@ -40,7 +40,7 @@ export class WebviewManager {
       .replace("%HASH%", +new Date()+"")
       .replace(
         "%INDEX_JS%",
-        urlOfFile(this.panel, context, "src\\react-ui\\dist\\src\\index.js")
+        urlOfFile(this.panel, context, "src\\react-ui\\dist\\react-ui\\src\\index.js")
       )
       .replace(
         "%APP_CSS%",

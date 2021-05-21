@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { ControllerManager } from "./controller/controller-decorator";
 import { WebviewManager } from "./react-ui/extension-handler";
 import "./controller";
+import { MessageManager } from "./message/message-manager";
 
 export function activate(context: vscode.ExtensionContext) {
   const webviewManager = new WebviewManager();
@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
   setImmediate(() => {
     webviewManager.open(context);
-    webviewManager.attach(ControllerManager.instance.messageHandler);
+    webviewManager.attach(MessageManager.instance.messageHandler);
   });
 }
 

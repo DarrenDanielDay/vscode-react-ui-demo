@@ -1,9 +1,14 @@
 import type {
+  AnyMessage,
   Message,
-  ProtocalCommand,
-  UIRequestExtensionProtocol,
-} from "../message-protocol";
-
+  Request,
+  Response
+} from "../communication.js";
+import type {
+  ArrayAccess,
+  StringAccessPaths
+} from '../../utils/types/path.js'
+import type { CoreAPI } from "../message-protocol.js";
 // @ts-ignore
 const vscode: { postMessage(params: Message<any>): any } = acquireVsCodeApi();
 
@@ -42,32 +47,31 @@ export class MessageManager {
     reject?.(error);
     this.messageQueue.delete(seq);
   }
-  async request<K extends ProtocalCommand>(
-    command: K,
-    payload: UIRequestExtensionProtocol[K]["request"]
-  ): Promise<UIRequestExtensionProtocol[K]["response"]> {
+  async request<K extends StringAccessPaths<CoreAPI>>(
+    path: K,
+    payload: Parameters<ArrayAccess<CoreAPI, K>>
+  ): Promise<Response<ReturnType<ArrayAccess<CoreAPI, K>>>> {
     return new Promise((resolve, reject) => {
-      const seq = this.enqueue({ resolve, reject });
-      const message: Message<any> = {
-        command,
-        hasError: false,
-        payload,
-        seq,
+      const id = this.enqueue({ resolve, reject });
+      const request: Request<Parameters<ArrayAccess<CoreAPI, K>>> = {
+        payload: {
+          path,
+          args: payload
+        },
+        id,
         type: "request",
       };
-      vscode.postMessage(message);
+      vscode.postMessage(request);
     });
   }
 
-  listener = (event: { data: Message<any> }) => {
+  listener = (event: { data: AnyMessage }) => {
     const message = event.data;
-    const { hasError, payload, seq, type } = message;
-    if (type === "response") {
-      if (hasError) {
-        this.abort(seq, payload);
-      } else {
-        this.accept(seq, payload);
+    if (message.type === "response") {
+        this.accept(message.id, message.payload.data);
       }
+     else if (message.type === "error") {
+      this.abort(message.payload.error ?? message.payload.message)
     }
   };
 }
