@@ -1419,10 +1419,10 @@ table@^6.0.4:
     slice-ansi "^4.0.0"
     string-width "^4.2.0"
 
-taio@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.npmjs.org/taio/-/taio-0.2.1.tgz#2c9e898b271f482e91f0cc9828c84f8799f434b6"
-  integrity sha512-jtIKNJvjdjkX+OKOGyL6pWLi6BcfE2OLK9Xr/Km/DUW/Rwsp+s5REjepCSm6NUQ71n56TghVGMKocZdyU+drig==
+taio@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.npmjs.org/taio/-/taio-0.3.0.tgz#d1e1825408c110dd23ab8fb465c61537f4d676fd"
+  integrity sha512-XkBkT10ClG7U8aHK3MCZEjOM9c1Nh6fWLX8L4JiXtexZpMJLtePtbK6Z5jA4LwcVbd2cBr8bLcnQMB6wc800Tg==
 
 text-table@^0.2.0:
   version "0.2.0"

@@ -1,9 +1,8 @@
-// Note that you can only import relative modules end with `.js` suffix in the UI sub-project.
-// Because this UI demo is based on CDN react bundle and `script` tag with `type="module"`.
-import { App } from "./app.js";
-import { MessageManager } from "./messager.js";
+import ReactDOM from 'react-dom'
+import React from 'react'
+import { MessageManager } from "./messager";
+import { App } from "./app";
 
-// Use `import type` for your type defined. These imports will be ignored by tsc.
 window.addEventListener("message", MessageManager.instance.listener);
 const noop = () => {
   // Do nothing

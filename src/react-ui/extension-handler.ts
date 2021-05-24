@@ -5,7 +5,6 @@ import * as path from "path";
 export class WebviewManager {
   panel: vscode.WebviewPanel | undefined;
   public messageHandler?: Parameters<vscode.Webview["onDidReceiveMessage"]>[0];
-  constructor() {}
   open(context: vscode.ExtensionContext) {
     if (this.panel) {
       return;
@@ -37,10 +36,10 @@ export class WebviewManager {
         path.join(context.extensionPath, "src\\react-ui\\index.html")
       )
       .toString("utf-8")
-      .replace("%HASH%", +new Date()+"")
+      .replace("%HASH%", +new Date() + "")
       .replace(
         "%INDEX_JS%",
-        urlOfFile(this.panel, context, "src\\react-ui\\dist\\react-ui\\src\\index.js")
+        urlOfFile(this.panel, context, "src\\react-ui\\dist\\index.js")
       )
       .replace(
         "%APP_CSS%",
@@ -62,15 +61,14 @@ export class WebviewManager {
     if (!this.panel) {
       throw new Error("Please open webview first!");
     }
-    this.panel.webview.onDidReceiveMessage(
-      (this.messageHandler = async (e) => {
-        if (!this.panel) {
-          return;
-        }
-        const result = await messageHandler(e);
-        this.panel.webview.postMessage(result);
-      })
-    );
+    this.messageHandler = async (e) => {
+      if (!this.panel) {
+        return;
+      }
+      const result = await messageHandler(e);
+      this.panel.webview.postMessage(result);
+    };
+    this.panel.webview.onDidReceiveMessage(this.messageHandler);
     return this;
   }
 }

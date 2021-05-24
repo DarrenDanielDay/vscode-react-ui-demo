@@ -1,5 +1,6 @@
-import { useLoading } from "./use-loading.js";
-import { useSafeState } from "./use-safe-state.js";
+import { useCallback, useEffect } from "react";
+import { useLoading } from "./use-loading";
+import { useSafeState } from "./use-safe-state";
 
 export interface StateStoreService<T> {
   getAllState(): Promise<T>;
@@ -10,15 +11,15 @@ export interface StateStoreService<T> {
 export function useStoredState<T>(initState: T, service: StateStoreService<T>): [T, <K extends keyof T>(key: K, value: T[K]) => void, boolean, () => void] {
   const [state, setState] = useSafeState<T>(initState);
   const [loading, loadingScope] = useLoading();
-  const fetch = React.useCallback(
+  const fetch = useCallback(
     () =>
       loadingScope(async () => {
-        const state = await service.getAllState();
-        setState(state);
+        const serverStates = await service.getAllState();
+        setState(serverStates);
       }),
     []
   );
-  React.useEffect(() => {
+  useEffect(() => {
     fetch();
   }, []);
   async function setStoredState<K extends keyof T>(key: K, value: T[K]) {

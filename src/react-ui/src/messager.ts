@@ -1,14 +1,7 @@
-import type {
-  AnyMessage,
-  Message,
-  Request,
-  Response
-} from "../communication.js";
-import type {
-  ArrayAccess,
-} from '../../utils/types/path.js'
-import type { CoreAPI } from "../message-protocol.js";
-import { StringAccessPaths } from "taio/build/types/object";
+import type { AnyMessage, Message, Request, Response } from "../communication";
+import type { AccessByPath, AccessPaths } from "taio/build/types/object";
+import type { AnyFunc } from "taio/build/types/concepts";
+import type { CoreAPI } from "../message-protocol";
 // @ts-ignore
 const vscode: { postMessage(params: Message<any>): any } = acquireVsCodeApi();
 
@@ -20,9 +13,9 @@ export interface PromiseHandler<T> {
 export class MessageManager {
   private static _instance: MessageManager | undefined;
   static get instance() {
-    return (this._instance ??= new MessageManager());
+    this._instance = this._instance ?? new MessageManager();
+    return this._instance;
   }
-  private constructor() {}
 
   messageQueue = new Map<number, PromiseHandler<any>>();
   private _seq = 0;
@@ -47,16 +40,18 @@ export class MessageManager {
     reject?.(error);
     this.messageQueue.delete(seq);
   }
-  async request<K extends StringAccessPaths<CoreAPI>>(
+  async request<K extends AccessPaths<CoreAPI>>(
     path: K,
-    payload: Parameters<ArrayAccess<CoreAPI, K>>
-  ): Promise<Response<ReturnType<ArrayAccess<CoreAPI, K>>>> {
+    payload: Parameters<Extract<AccessByPath<CoreAPI, K>, AnyFunc>>
+  ): Promise<Response<ReturnType<Extract<AccessByPath<CoreAPI, K>, AnyFunc>>>> {
     return new Promise((resolve, reject) => {
       const id = this.enqueue({ resolve, reject });
-      const request: Request<Parameters<ArrayAccess<CoreAPI, K>>> = {
+      const request: Request<
+        Parameters<Extract<AccessByPath<CoreAPI, K>, AnyFunc>>
+      > = {
         payload: {
           path,
-          args: payload
+          args: payload,
         },
         id,
         type: "request",
@@ -68,10 +63,9 @@ export class MessageManager {
   listener = (event: { data: AnyMessage }) => {
     const message = event.data;
     if (message.type === "response") {
-        this.accept(message.id, message.payload.data);
-      }
-     else if (message.type === "error") {
-      this.abort(message.payload.error ?? message.payload.message)
+      this.accept(message.id, message.payload.data);
+    } else if (message.type === "error") {
+      this.abort(message.payload.error ?? message.payload.message);
     }
   };
 }

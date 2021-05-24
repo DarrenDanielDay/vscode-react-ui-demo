@@ -49,6 +49,6 @@
     "vscode-test": "^1.5.0"
   },
   "dependencies": {
-    "taio": "^0.2.1"
+    "taio": "^0.3.0"
   }
 }

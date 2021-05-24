@@ -1,14 +1,13 @@
-import { StringAccessPaths } from 'taio/build/types/object'
-import { ArrayAccess } from "./types/path";
+import { AccessByPath, AccessPaths } from 'taio/build/types/object'
 
 export function toJSON(obj: unknown): string {
   return JSON.stringify(obj);
 }
 
-export function access<T, Path extends StringAccessPaths<T>>(
+export function access<T, Path extends AccessPaths<T>>(
   source: T,
   path: Path
-): ArrayAccess<T, Path> {
+): AccessByPath<T, Path> {
   // @ts-expect-error
   if (!Array.isArray(path) || path.some(p => typeof p !== "string")) {
     throw new Error("Access path must be string array");

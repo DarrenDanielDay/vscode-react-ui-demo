@@ -4,7 +4,8 @@ import { Message, Request } from "../react-ui/communication";
 export class MessageManager {
   private static _instance?: MessageManager;
   static get instance() {
-    return (this._instance ??= new MessageManager());
+    this._instance = this._instance ?? new MessageManager();
+    return this._instance;
   }
   isMessage(obj: any): obj is Message<any> {
     return (
