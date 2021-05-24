@@ -6,9 +6,9 @@ import type {
 } from "../communication.js";
 import type {
   ArrayAccess,
-  StringAccessPaths
 } from '../../utils/types/path.js'
 import type { CoreAPI } from "../message-protocol.js";
+import { StringAccessPaths } from "taio/build/types/object";
 // @ts-ignore
 const vscode: { postMessage(params: Message<any>): any } = acquireVsCodeApi();
 

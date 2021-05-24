@@ -1,4 +1,5 @@
-import { ArrayAccess, StringAccessPaths } from "./types/path";
+import { StringAccessPaths } from 'taio/build/types/object'
+import { ArrayAccess } from "./types/path";
 
 export function toJSON(obj: unknown): string {
   return JSON.stringify(obj);

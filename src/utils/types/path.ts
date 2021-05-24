@@ -1,3 +1,5 @@
+import { StringAccessPaths } from "taio/build/types/object";
+
 type PrimitiveTypes =
   | string
   | number
@@ -27,12 +29,6 @@ export type StringAccessKeyOf<T> = T extends PrimitiveTypes
 
 type CutFirst<Arr extends unknown[]> = Arr extends [unknown, ...infer Rest]
   ? Rest
-  : [];
-export type StringAccessPaths<T> = T extends object
-  ? {
-      // @ts-ignore
-      [K in StringAccessKeyOf<T>]:[K] | [K, ...StringAccessPaths<T[K]>];
-    }[StringAccessKeyOf<T>]
   : [];
 
 type Join<Arr extends string[]> = Arr extends []

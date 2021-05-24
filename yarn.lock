@@ -1419,6 +1419,11 @@ table@^6.0.4:
     slice-ansi "^4.0.0"
     string-width "^4.2.0"
 
+taio@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.npmjs.org/taio/-/taio-0.2.1.tgz#2c9e898b271f482e91f0cc9828c84f8799f434b6"
+  integrity sha512-jtIKNJvjdjkX+OKOGyL6pWLi6BcfE2OLK9Xr/Km/DUW/Rwsp+s5REjepCSm6NUQ71n56TghVGMKocZdyU+drig==
+
 text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.npm.taobao.org/text-table/download/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"

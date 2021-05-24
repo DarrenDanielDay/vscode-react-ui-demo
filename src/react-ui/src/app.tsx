@@ -48,6 +48,7 @@ export const App: React.FC = () => {
       >
         send count to extension
       </button>
+      <iframe src="http://localhost:8080" title="if"></iframe>
     </div>
   );
 };
