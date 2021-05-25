@@ -7,8 +7,15 @@ import * as path from "path";
 let uiBuildProcess: child_process.ChildProcess | null = null;
 export function activate(context: vscode.ExtensionContext) {
   const webviewManager = new WebviewManager();
-  const { open, reload, close } = webviewManager;
-  [open, reload, close].forEach((command) => {
+  const { open: doOpen, reload, close } = webviewManager;
+  const openCommandHandler = function open(
+    this: WebviewManager,
+    ctx: vscode.ExtensionContext
+  ) {
+    doOpen.call(this, ctx);
+    webviewManager.attach(MessageManager.instance.messageHandler);
+  };
+  [openCommandHandler, reload, close].forEach((command) => {
     const disposable = vscode.commands.registerCommand(
       `vscode-react-ui-demo.${command.name}`,
       command.bind(webviewManager, context)
@@ -55,8 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
       console.log("UI builder process exited, code =", code);
     });
     //#endregion
-    webviewManager.open(context);
-    webviewManager.attach(MessageManager.instance.messageHandler);
+    openCommandHandler.call(webviewManager, context);
   });
 }
 

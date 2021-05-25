@@ -21,6 +21,7 @@ export class WebviewManager {
 
     this.panel.onDidDispose((e) => {
       this.panel = undefined;
+      this.detach();
     });
     this.reload(context);
   }
@@ -50,10 +51,11 @@ export class WebviewManager {
     if (!this.panel) {
       return;
     }
+    this.detach();
     this.panel.dispose();
     this.panel = undefined;
   }
-
+  private attachResource?: vscode.Disposable;
   attach(messageHandler: Parameters<vscode.Webview["onDidReceiveMessage"]>[0]) {
     if (this.messageHandler) {
       throw new Error("Cannot attach handler more than once!");
@@ -68,8 +70,13 @@ export class WebviewManager {
       const result = await messageHandler(e);
       this.panel.webview.postMessage(result);
     };
-    this.panel.webview.onDidReceiveMessage(this.messageHandler);
+    this.attachResource = this.panel.webview.onDidReceiveMessage(this.messageHandler);
     return this;
+  }
+
+  detach() {
+    this.messageHandler = undefined;
+    this.attachResource?.dispose()
   }
 }
 
