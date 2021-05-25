@@ -1,21 +1,36 @@
 import React, { useState } from "react";
-import { Button } from "@material-ui/core";
+import { Button, CircularProgress } from "@material-ui/core";
 import { useStoredState } from "./hooks/use-stored-state";
+
+function delay(seconds: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, seconds * 1000);
+  });
+}
 
 export const App: React.FC = () => {
   const [count, setCount] = useState(0);
-  const [dateStore, setDateStore] = useStoredState(
+  const [dateStore, setDateStore, loading] = useStoredState(
     { date: new Date().toString() },
     {
       async getAllState() {
+        // Suppose getting states from extension takes some time
+        await delay(1);
         return {
           date: (await window.SessionInvoker.getState("date")) as string,
         };
       },
-      getState(key) {
-        return window.SessionInvoker.getState(key) as Promise<string>;
+      async getState(key): Promise<string> {
+        // Suppose getting states from extension takes some time
+        await delay(1);
+        const extensionState = (await window.SessionInvoker.getState(key)) as
+          | string
+          | null;
+        return extensionState ?? dateStore.date;
       },
-      setState(key, value) {
+      async setState(key, value) {
         return window.SessionInvoker.setState(key, value);
       },
     }
@@ -30,11 +45,6 @@ export const App: React.FC = () => {
       >
         use react hooks! count = {count}
       </button>
-      <p>
-        Extension saved state (Here we used a Date string for example),
-        avaliable until when the extension is deactivated.
-      </p>
-      <p>{dateStore.date}</p>
       <button
         onClick={async () => {
           try {
@@ -42,7 +52,6 @@ export const App: React.FC = () => {
               `Current count in React UI is ${count}!`
             );
             console.log("returned message", result);
-            setDateStore("date", new Date().toString());
           } catch (e) {
             console.error(e);
           }
@@ -50,6 +59,26 @@ export const App: React.FC = () => {
       >
         send count to extension
       </button>
+      <p>
+        The following is a state saved by extension (Here we used a Date string
+        for example).
+      </p>
+      <p>
+        {dateStore.date}
+        {loading && <CircularProgress />}
+      </p>
+      <p>
+        This state is avaliable until the extension is deactivated (can be
+        recovered if you close the webview panel and then open it).
+      </p>
+      <button
+        onClick={() => {
+          setDateStore("date", new Date().toString());
+        }}
+      >
+        store current date to extension session level
+      </button>
+
       <p>
         You can also install any third-party <code>npm</code> packages avaliable
         in browser for the UI sub-project, such as{" "}
