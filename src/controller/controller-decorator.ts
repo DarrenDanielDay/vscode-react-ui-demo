@@ -1,8 +1,4 @@
-import type {
-  Error,
-  Request,
-  Response,
-} from "../react-ui/communication";
+import type { Error, Request, Response } from "../react-ui/communication";
 import { access, toJSON } from "../utils";
 import * as vscode from "vscode";
 interface ControllerConstructor {
@@ -12,7 +8,8 @@ interface ControllerConstructor {
 export class ControllerManager {
   private static _instance: ControllerManager | undefined;
   static get instance() {
-    return (this._instance ??= new ControllerManager());
+    this._instance = this._instance ?? new ControllerManager();
+    return this._instance;
   }
   static toJSONObject<T>(obj: T): T {
     if (typeof obj === "object") {

@@ -1,5 +1,5 @@
-import ReactDOM from 'react-dom'
-import React from 'react'
+import ReactDOM from "react-dom";
+import React from "react";
 import { MessageManager } from "./messager";
 import { App } from "./app";
 

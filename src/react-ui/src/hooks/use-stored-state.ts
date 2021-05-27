@@ -8,7 +8,10 @@ export interface StateStoreService<T> {
   setState<K extends keyof T>(key: K, value: T[K]): Promise<void>;
 }
 
-export function useStoredState<T>(initState: T, service: StateStoreService<T>): [T, <K extends keyof T>(key: K, value: T[K]) => void, boolean, () => void] {
+export function useStoredState<T>(
+  initState: T,
+  service: StateStoreService<T>
+): [T, <K extends keyof T>(key: K, value: T[K]) => void, boolean, () => void] {
   const [state, setState] = useSafeState<T>(initState);
   const [loading, loadingScope] = useLoading();
   const fetch = useCallback(

@@ -18,6 +18,7 @@
     "moduleResolution": "Node",
     "target": "ESNext",
     "jsx": "react",
+    "skipLibCheck": true,
     "lib": ["DOM", "ES2019"]
   },
   "include": ["src"]

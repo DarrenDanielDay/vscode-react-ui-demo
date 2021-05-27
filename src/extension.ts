@@ -6,18 +6,20 @@ import { MessageManager } from "./message/message-manager";
 import * as child_process from "child_process";
 import * as path from "path";
 import { Inject } from "./controller/controller-decorator";
+import { TypedObject } from "taio/build/libs/object";
 let uiBuildProcess: child_process.ChildProcess | null = null;
 export function activate(context: vscode.ExtensionContext) {
   Inject.context = context;
   const webviewManager = new WebviewManager();
   const { open: doOpen, reload, close } = webviewManager;
-  const openCommandHandler = function open(
+  const openCommandHandler = function (
     this: WebviewManager,
     ctx: vscode.ExtensionContext
   ) {
     doOpen.call(this, ctx);
     webviewManager.attach(MessageManager.instance.messageHandler);
   };
+  TypedObject.defineProperty(openCommandHandler, "name", { value: "open" });
   [openCommandHandler, reload, close].forEach((command) => {
     const disposable = vscode.commands.registerCommand(
       `vscode-react-ui-demo.${command.name}`,

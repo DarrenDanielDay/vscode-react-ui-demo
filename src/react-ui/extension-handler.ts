@@ -34,7 +34,13 @@ export class WebviewManager {
     }
     // TODO Use webpack to make it easier.
     this.panel.webview.html = fs
-      .readFileSync(path.join(context.extensionPath, ...env.STATIC_FILE_BASE_DIR_NAMES, "index.html"))
+      .readFileSync(
+        path.join(
+          context.extensionPath,
+          ...env.STATIC_FILE_BASE_DIR_NAMES,
+          "index.html"
+        )
+      )
       .toString("utf-8")
       .replace("%HASH%", +new Date() + "")
       .replace("%INDEX_JS%", this.staticFileUrlString(context, "index.js"))

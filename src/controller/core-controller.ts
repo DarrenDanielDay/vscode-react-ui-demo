@@ -3,7 +3,7 @@ import { CoreAPI } from "../react-ui/message-protocol";
 import { Controller, Inject } from "./controller-decorator";
 
 @Controller
-export class DemoController implements CoreAPI {
+export class CoreController implements CoreAPI {
   @Inject.singleton(() => new Map<string, unknown>())
   private readonly stateMap!: Map<string, unknown>;
   setState(key: string, value: unknown): void {

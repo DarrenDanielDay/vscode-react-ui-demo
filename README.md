@@ -39,8 +39,8 @@ Then press `F5` in `vscode`, and you will see the demo UI in a new `vscode` wind
 
 ## TODO
 
-* Better CSS support
-* Better communication API
-* Fix issue of reload
+- Better CSS support
+- Better communication API
+- Fix issue of reload
 
 **Enjoy!**

@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from "react";
 
-export function useSafeState<T>(initState: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+export function useSafeState<T>(
+  initState: T
+): [T, React.Dispatch<React.SetStateAction<T>>] {
   const isValidLifeCycle = useRef(true);
   const [internalState, setInternalState] = useState(initState);
   useEffect(
