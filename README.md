@@ -25,12 +25,12 @@ In the opened `vscode` window, open the integrated terminal and run the followin
 
 ```sh
 # In the integrated terminal of vscode window
-yarn                # Install dependencies for extension.
-cd src/react-ui
-yarn                # Install dependencies for UI sub-project.
+yarn                # Install all dependencies for extension (as well as dependencies of UI sub-project).
 
-# The following is optional (UI sub-project folder as working directory)
-yarn watch:types    # Using tsc to check typing and watch file changes.
+# The following is optional
+yarn watch:types    # Using `tsc` to check typing and watch file changes.
+cd src/react-ui     # In UI sub-project folder,
+yarn watch:types    # also used `tsc` to check typing and watch file changes.
 ```
 
 Then press `F5` in `vscode`, and you will see the demo UI in a new `vscode` window. Edit source code in UI sub-project and see changes!

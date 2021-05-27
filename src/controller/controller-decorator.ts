@@ -1,12 +1,10 @@
-import {
+import type {
   Error,
-  Event,
-  Message,
   Request,
   Response,
 } from "../react-ui/communication";
 import { access, toJSON } from "../utils";
-
+import * as vscode from "vscode";
 interface ControllerConstructor {
   new (): unknown;
 }
@@ -37,7 +35,7 @@ export class ControllerManager {
     for (const key of path) {
       const currentTargets = [...accessMapping.entries()];
       for (const [controller, target] of currentTargets) {
-        if (!Object.prototype.hasOwnProperty.call(target, key)) {
+        if (!Reflect.has(target, key)) {
           accessMapping.delete(controller);
         } else {
           accessMapping.set(controller, Reflect.get(target, key));
@@ -108,7 +106,7 @@ export const Controller: ClassDecorator = (target: ControllerConstructor) => {
 };
 
 export const Inject = {
-  singleTone<T>(creator: () => T, readonly: boolean = true): PropertyDecorator {
+  singleton<T>(creator: () => T, readonly: boolean = true): PropertyDecorator {
     const decorator: PropertyDecorator = (target, key) => {
       const value = creator();
       const descriptor: PropertyDescriptor = readonly
@@ -136,4 +134,15 @@ export const Inject = {
     };
     return decorator;
   },
+  withContext<T>(
+    creator: (context: vscode.ExtensionContext) => T
+  ): PropertyDecorator {
+    return this.scoped(() => {
+      if (!this.context) {
+        throw new Error("Context not found!");
+      }
+      return creator(this.context);
+    });
+  },
+  context: undefined as undefined | vscode.ExtensionContext,
 };

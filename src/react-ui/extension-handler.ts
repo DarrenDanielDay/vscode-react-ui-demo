@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-
+import env from "@esbuild-env";
 export class WebviewManager {
   panel: vscode.WebviewPanel | undefined;
   public messageHandler?: Parameters<vscode.Webview["onDidReceiveMessage"]>[0];
@@ -34,20 +34,24 @@ export class WebviewManager {
     }
     // TODO Use webpack to make it easier.
     this.panel.webview.html = fs
-      .readFileSync(
-        path.join(context.extensionPath, "src\\react-ui\\index.html")
-      )
+      .readFileSync(path.join(context.extensionPath, ...env.STATIC_FILE_BASE_DIR_NAMES, "index.html"))
       .toString("utf-8")
       .replace("%HASH%", +new Date() + "")
-      .replace(
-        "%INDEX_JS%",
-        urlOfFile(this.panel, context, "src\\react-ui\\dist\\index.js")
-      )
-      .replace(
-        "%APP_CSS%",
-        urlOfFile(this.panel, context, "src\\react-ui\\src\\app.css")
-      );
+      .replace("%INDEX_JS%", this.staticFileUrlString(context, "index.js"))
+      .replace("%APP_CSS%", this.staticFileUrlString(context, "index.css"));
   }
+
+  private staticFileUrlString(
+    context: vscode.ExtensionContext,
+    ...paths: string[]
+  ): string {
+    return urlOfFile(
+      this.panel!,
+      context,
+      path.join(...env.STATIC_FILE_BASE_DIR_NAMES, ...paths)
+    );
+  }
+
   close() {
     if (!this.panel) {
       return;
@@ -71,13 +75,15 @@ export class WebviewManager {
       const result = await messageHandler(e);
       this.panel.webview.postMessage(result);
     };
-    this.attachResource = this.panel.webview.onDidReceiveMessage(this.messageHandler);
+    this.attachResource = this.panel.webview.onDidReceiveMessage(
+      this.messageHandler
+    );
     return this;
   }
 
   detach() {
     this.messageHandler = undefined;
-    this.attachResource?.dispose()
+    this.attachResource?.dispose();
   }
 }
 
