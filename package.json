@@ -2,7 +2,7 @@
   "name": "vscode-react-ui-demo",
   "displayName": "vscode-react-ui-demo",
   "description": "A demo for creating vscode plugin with webview powered by React.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": {
     "email": "Darren_Daniel_Day@hotmail.com",
     "name": "Darren Daniel Day",
