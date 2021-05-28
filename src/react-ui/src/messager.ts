@@ -65,7 +65,7 @@ export class MessageManager {
     if (message.type === "response") {
       this.accept(message.id, message.payload.data);
     } else if (message.type === "error") {
-      this.abort(message.payload.error ?? message.payload.message);
+      this.abort(message.id, message.payload.error ?? message.payload.message);
     }
   };
 }
