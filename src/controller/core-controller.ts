@@ -18,6 +18,7 @@ export class CoreController implements CoreAPI {
   private readonly channel!: vscode.OutputChannel;
   logInput(params: string): string {
     this.channel.appendLine(params);
+    this.channel.show();
     return `The log <${params}> has been logged into OUTPUT "vscode-react-ui-demo Logger". You can find them by "Ctrl + Shift + U" `;
   }
 }

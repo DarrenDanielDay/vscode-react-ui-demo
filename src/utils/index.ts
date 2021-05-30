@@ -20,5 +20,3 @@ export function access<T, Path extends AccessPaths<T>>(
   // @ts-expect-error
   return result;
 }
-
-access({ a: { b: 1 } }, ["a"]);

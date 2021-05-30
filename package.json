@@ -2,6 +2,9 @@
   "name": "vscode-react-ui-demo",
   "displayName": "vscode-react-ui-demo",
   "description": "A demo for creating vscode plugin with webview powered by React.",
+  "extensionKind": [
+    "ui"
+  ],
   "version": "0.1.1",
   "author": {
     "email": "Darren_Daniel_Day@hotmail.com",
@@ -37,7 +40,31 @@
         "command": "vscode-react-ui-demo.reload",
         "title": "VSCode React UI Demo: Reload Webview"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vscode-react-ui-demo",
+          "title": "vscode-react-ui-demo",
+          "icon": "icon.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "contents": "Welcome to vscode-react-ui-demo!\n[Open Webview UI built with react](command:vscode-react-ui-demo.open)",
+        "view": "vscode-react-ui-demo.view.startup",
+        "when": "config.git.enabled"
+      }
+    ],
+    "views": {
+      "vscode-react-ui-demo": [
+        {
+          "id": "vscode-react-ui-demo.view.startup",
+          "name": "Startup Menu"
+        }
+      ]
+    }
   },
   "scripts": {
     "prepare": "husky install && cd src/react-ui && yarn",
@@ -58,6 +85,7 @@
     "husky": "^6.0.0",
     "prettier": "^2.3.0",
     "pretty-quick": "^3.1.0",
+    "terser": "^5.7.0",
     "typescript": "^4.3.2",
     "vsce": "^1.88.0"
   },

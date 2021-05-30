@@ -1,44 +1,52 @@
 import * as vscode from "vscode";
-import env from "@esbuild-env";
-import { WebviewManager } from "./react-ui/extension-handler";
-import "./controller";
-import { MessageManager } from "./message/message-manager";
 import * as child_process from "child_process";
 import * as path from "path";
+import env from "@esbuild-env";
+import { MessageManager } from "./message/message-manager";
+import { WebviewManager } from "./react-ui/extension-handler";
 import { Inject } from "./controller/controller-decorator";
-import { TypedObject } from "taio/build/libs/object";
+import "./controller";
 let uiBuildProcess: child_process.ChildProcess | null = null;
 export function activate(context: vscode.ExtensionContext) {
   Inject.context = context;
   const webviewManager = new WebviewManager();
+  context.subscriptions.push(webviewManager);
   const { open: doOpen, reload, close } = webviewManager;
-  const openCommandHandler = function (
-    this: WebviewManager,
-    ctx: vscode.ExtensionContext
-  ) {
+  const open = function (this: WebviewManager, ctx: vscode.ExtensionContext) {
     doOpen.call(this, ctx);
-    webviewManager.attach(MessageManager.instance.messageHandler);
+    webviewManager.messageHandler ||
+      webviewManager.attach(MessageManager.instance.messageHandler);
   };
-  TypedObject.defineProperty(openCommandHandler, "name", { value: "open" });
-  [openCommandHandler, reload, close].forEach((command) => {
-    const disposable = vscode.commands.registerCommand(
-      `vscode-react-ui-demo.${command.name}`,
-      command.bind(webviewManager, context)
-    );
-    context.subscriptions.push(disposable);
-  });
-  setImmediate(() => {
-    if (env.ENV === "dev") {
-      startUIDevMode(context, webviewManager).then(() => {
-        openCommandHandler.call(webviewManager, context);
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "vscode-react-ui-demo.open",
+      open.bind(webviewManager, context)
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "vscode-react-ui-demo.close",
+      close.bind(webviewManager, context)
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "vscode-react-ui-demo.reload",
+      reload.bind(webviewManager, context)
+    )
+  );
+  if (env.ENV === "dev") {
+    startUIDevMode(context, webviewManager).then(() => {
+      console.log("Successfully built React UI resources");
+      vscode.commands.executeCommand("vscode-react-ui-demo.open").then(() => {
+        console.log("Successfully opened webview");
       });
-    } else {
-      openCommandHandler.call(webviewManager, context);
-    }
-  });
+    });
+  }
 }
 
 export function deactivate() {
+  Inject.context = undefined;
   if (uiBuildProcess) {
     uiBuildProcess.removeAllListeners();
     uiBuildProcess.kill("SIGKILL");

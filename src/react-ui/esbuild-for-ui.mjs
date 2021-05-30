@@ -3,6 +3,7 @@ import esbuild from "esbuild";
 import path from "path";
 import fs from "fs";
 import util from "util";
+import { minify } from "terser";
 const isDev = process.argv.includes("--dev");
 let readyState = false;
 let reactUIFolder = isDev
@@ -48,7 +49,18 @@ const options = {
     },
   ],
 };
-esbuild.build(options);
+esbuild
+  .build(options)
+  .then(async () => {
+    const read = util.promisify(fs.readFile);
+    const write = util.promisify(fs.writeFile);
+    const bundle = path.resolve(options.outdir ?? "", "index.js");
+    const content = (await read(bundle)).toString("utf-8");
+    const minified = await minify(content, { ecma: 2015 });
+    await write(bundle, minified.code ?? "");
+    console.log("terser minify finished");
+  })
+  .catch(console.error);
 //#endregion
 /**
  * Copy static files

@@ -2,7 +2,10 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import env from "@esbuild-env";
-export class WebviewManager {
+/**
+ * Manage a single webview.
+ */
+export class WebviewManager implements vscode.Disposable {
   panel: vscode.WebviewPanel | undefined;
   public messageHandler?: Parameters<vscode.Webview["onDidReceiveMessage"]>[0];
   open(context: vscode.ExtensionContext) {
@@ -90,6 +93,10 @@ export class WebviewManager {
   detach() {
     this.messageHandler = undefined;
     this.attachResource?.dispose();
+  }
+
+  dispose() {
+    this.close();
   }
 }
 
