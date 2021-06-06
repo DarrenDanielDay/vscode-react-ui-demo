@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, CircularProgress } from "@material-ui/core";
 import { useStoredState } from "./hooks/use-stored-state";
 
@@ -35,6 +35,15 @@ export const App: React.FC = () => {
       },
     }
   );
+  useEffect(() => {
+    const handler = (message: string) => {
+      console.log("UI", message);
+    };
+    window.SessionHubs.on("chat", handler);
+    return () => {
+      window.SessionHubs.off("chat", handler);
+    };
+  }, []);
   return (
     <div>
       <h1 className="extension-title">Hello, React UI {"&"} ESbuild!</h1>
@@ -84,7 +93,14 @@ export const App: React.FC = () => {
         in browser for the UI sub-project, such as{" "}
         <code>@material-ui/core</code>.
       </p>
-      <Button color="primary">This is a Material UI Button</Button>
+      <Button
+        color="primary"
+        onClick={() => {
+          window.SessionHubs.emit("chat", "UI dispatched!");
+        }}
+      >
+        Click Material UI Button to dispatch event
+      </Button>
     </div>
   );
 };

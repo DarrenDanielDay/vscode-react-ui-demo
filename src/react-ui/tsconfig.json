@@ -14,7 +14,7 @@
     "outDir": "dist",
     "sourceMap": true,
     "downlevelIteration": true,
-    "module": "ES6",
+    "module": "ESNext",
     "moduleResolution": "Node",
     "target": "ESNext",
     "jsx": "react",

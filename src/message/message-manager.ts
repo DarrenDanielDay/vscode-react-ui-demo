@@ -1,5 +1,6 @@
 import { ControllerManager } from "../controller/controller-decorator";
-import { Message, Request } from "../react-ui/communication";
+import { HubManager } from "../hubs/hub-manager";
+import { Event, Message, Request } from "../react-ui/communication";
 
 export class MessageManager {
   private static _instance?: MessageManager;
@@ -22,9 +23,15 @@ export class MessageManager {
       Array.isArray(obj.payload.args)
     );
   }
+  isEvent(obj: any): obj is Event<any> {
+    return this.isMessage(obj) && obj.type === "event";
+  }
   messageHandler = (e: any) => {
     if (this.isRequest(e)) {
       return ControllerManager.instance.requestHandler(e.payload.path, e);
+    }
+    if (this.isEvent(e)) {
+      return HubManager.instance.eventHandler(e);
     }
   };
 }

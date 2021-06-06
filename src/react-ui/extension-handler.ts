@@ -82,7 +82,7 @@ export class WebviewManager implements vscode.Disposable {
         return;
       }
       const result = await messageHandler(e);
-      this.panel.webview.postMessage(result);
+      !!result && this.panel.webview.postMessage(result);
     };
     this.attachResource = this.panel.webview.onDidReceiveMessage(
       this.messageHandler

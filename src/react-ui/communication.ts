@@ -1,3 +1,5 @@
+import { PropertyKeys } from "taio/build/types/concepts";
+
 export type MessageType = "request" | "response" | "event" | "error";
 
 export interface Message<T> {
@@ -38,4 +40,14 @@ export interface Error<E> extends Message<ErrorPayload<E>> {
 
 export interface Event<T> extends Message<T> {
   type: "event";
+  name: string;
+}
+
+export interface Hub<T> {
+  on<K extends PropertyKeys<T>>(event: K, handler: (value: T[K]) => void): void;
+  off<K extends PropertyKeys<T>>(
+    event: K,
+    handler: (value: T[K]) => void
+  ): void;
+  emit<K extends PropertyKeys<T>>(event: K, value: T[K]): void;
 }

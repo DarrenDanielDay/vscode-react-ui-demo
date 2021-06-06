@@ -1,7 +1,13 @@
-import type { AnyMessage, Message, Request, Response } from "../communication";
+import type {
+  AnyMessage,
+  Event,
+  Message,
+  Request,
+  Response,
+} from "../communication";
 import type { AccessByPath, AccessPaths } from "taio/build/types/object";
-import type { AnyFunc } from "taio/build/types/concepts";
-import type { CoreAPI } from "../message-protocol";
+import type { AnyFunc, PropertyKeys } from "taio/build/types/concepts";
+import type { CoreAPI, CoreHubEvents } from "../message-protocol";
 // @ts-ignore
 const vscode: { postMessage(params: Message<any>): any } = acquireVsCodeApi();
 
@@ -18,6 +24,10 @@ export class MessageManager {
   }
 
   messageQueue = new Map<number, PromiseHandler<any>>();
+  handlerMap = new Map<
+    PropertyKeys<CoreHubEvents>,
+    Set<(value: CoreHubEvents[PropertyKeys<CoreHubEvents>]) => void>
+  >();
   private _seq = 0;
   get seq() {
     return this._seq;
@@ -60,12 +70,53 @@ export class MessageManager {
     });
   }
 
+  dispatchToExtension<K extends PropertyKeys<CoreHubEvents>>(
+    name: K,
+    payload: CoreHubEvents[K]
+  ): void {
+    const event: Event<CoreHubEvents[K]> = {
+      id: 0,
+      name,
+      payload,
+      type: "event",
+    };
+    vscode.postMessage(event);
+  }
+
+  onEvent<K extends PropertyKeys<CoreHubEvents>>(
+    name: K,
+    handler: (value: CoreHubEvents[K]) => void
+  ) {
+    this.handlerMap.has(name) || this.handlerMap.set(name, new Set());
+    this.handlerMap.get(name)!.add(handler);
+  }
+
+  offEvent<K extends PropertyKeys<CoreHubEvents>>(
+    name: K,
+    handler: (value: CoreHubEvents[K]) => void
+  ) {
+    this.handlerMap.has(name) || this.handlerMap.set(name, new Set());
+    this.handlerMap.get(name)!.delete(handler);
+  }
+
+  private dispatchEvent<K extends PropertyKeys<CoreHubEvents>>(
+    name: K,
+    payload: CoreHubEvents[K]
+  ): void {
+    this.handlerMap.get(name)?.forEach((handler) => {
+      handler.call(undefined, payload);
+    });
+  }
+
   listener = (event: { data: AnyMessage }) => {
     const message = event.data;
     if (message.type === "response") {
       this.accept(message.id, message.payload.data);
     } else if (message.type === "error") {
       this.abort(message.id, message.payload.error ?? message.payload.message);
+    } else if (message.type === "event") {
+      // @ts-expect-error
+      this.dispatchEvent(message.name, message.payload);
     }
   };
 }

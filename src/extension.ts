@@ -6,17 +6,34 @@ import { MessageManager } from "./message/message-manager";
 import { WebviewManager } from "./react-ui/extension-handler";
 import { Inject } from "./controller/controller-decorator";
 import "./controller";
+import { HubManager } from "./hubs/hub-manager";
 let uiBuildProcess: child_process.ChildProcess | null = null;
 export function activate(context: vscode.ExtensionContext) {
   Inject.context = context;
   const webviewManager = new WebviewManager();
   context.subscriptions.push(webviewManager);
+  context.subscriptions.push(HubManager.instance);
   const { open: doOpen, reload, close } = webviewManager;
   const open = function (this: WebviewManager, ctx: vscode.ExtensionContext) {
     doOpen.call(this, ctx);
     webviewManager.messageHandler ||
       webviewManager.attach(MessageManager.instance.messageHandler);
+    HubManager.instance.attach(webviewManager.panel!.webview);
   };
+  const interval = setInterval(() => {
+    HubManager.instance.dipatcher.emit(
+      "chat",
+      "Dispatched by interval in extension"
+    );
+  }, 3000);
+  context.subscriptions.push({
+    dispose() {
+      clearInterval(interval);
+    },
+  });
+  HubManager.instance.dipatcher.on("chat", (message) => {
+    console.log("extension listener", message);
+  });
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "vscode-react-ui-demo.open",
@@ -67,7 +84,6 @@ function startUIDevMode(
     cwd: path.resolve(context.extensionPath, "src", "react-ui"),
   });
   uiBuildProcess.stdout?.addListener("data", (chunk) => {
-    console.log(chunk);
     if (Buffer.isBuffer(chunk)) {
       console.log(chunk.toString("utf-8"));
       webviewManager.reload(context);

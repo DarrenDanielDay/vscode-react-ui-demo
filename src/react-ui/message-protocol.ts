@@ -5,3 +5,7 @@ export interface CoreAPI {
   setState(key: string, value: unknown): void;
   getState(key: string): unknown;
 }
+
+export interface CoreHubEvents {
+  chat: string;
+}
