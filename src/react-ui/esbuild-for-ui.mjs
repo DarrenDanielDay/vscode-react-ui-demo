@@ -24,6 +24,9 @@ const options = {
   tsconfig: "./tsconfig.json",
   entryPoints: ["./src/index.tsx"],
   outdir: dist,
+  loader: {
+    ".svg": "dataurl",
+  },
   minify: !isDev,
   treeShaking: isDev ? undefined : true,
   watch: !isDev

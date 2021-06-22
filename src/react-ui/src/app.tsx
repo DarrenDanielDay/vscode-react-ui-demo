@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Button, CircularProgress } from "@material-ui/core";
+import {
+  Button,
+  CircularProgress,
+  colors,
+  createMuiTheme,
+  ThemeProvider,
+} from "@material-ui/core";
 import { useStoredState } from "./hooks/use-stored-state";
+import logo from "./logo.svg";
 
 function delay(seconds: number) {
   return new Promise<void>((resolve) => {
@@ -9,6 +16,12 @@ function delay(seconds: number) {
     }, seconds * 1000);
   });
 }
+const theme = createMuiTheme({
+  palette: {
+    primary: colors.lightBlue,
+    secondary: colors.pink,
+  },
+});
 
 export const App: React.FC = () => {
   const [count, setCount] = useState(0);
@@ -45,62 +58,110 @@ export const App: React.FC = () => {
     };
   }, []);
   return (
-    <div>
-      <h1 className="extension-title">Hello, React UI {"&"} ESbuild!</h1>
-      <button
-        onClick={() => {
-          setCount(count + 1);
-        }}
-      >
-        use react hooks! count = {count}
-      </button>
-      <button
-        onClick={async () => {
-          try {
-            const result = await window.SessionInvoker.logInput(
-              `Current count in React UI is ${count}!`
-            );
-            console.log("returned message", result);
-          } catch (e) {
-            console.error(e);
-          }
-        }}
-      >
-        send count to extension
-      </button>
-      <p>
-        The following is a state saved by extension (Here we used a Date string
-        for example).
-      </p>
-      <p>
-        {dateStore.date}
-        {loading && <CircularProgress />}
-      </p>
-      <p>
-        This state is avaliable until the extension is deactivated (can be
-        recovered if you close the webview panel and then open it).
-      </p>
-      <button
-        onClick={() => {
-          setDateStore("date", new Date().toString());
-        }}
-      >
-        store current date to extension session level
-      </button>
-
-      <p>
-        You can also install any third-party <code>npm</code> packages avaliable
-        in browser for the UI sub-project, such as{" "}
-        <code>@material-ui/core</code>.
-      </p>
-      <Button
-        color="primary"
-        onClick={() => {
-          window.SessionHubs.emit("chat", "UI dispatched!");
-        }}
-      >
-        Click Material UI Button to dispatch event
-      </Button>
-    </div>
+    <ThemeProvider theme={theme}>
+      <div className="App">
+        <header className="App-header">
+          <img src={logo} className="App-logo" alt="logo" />
+          <p>
+            Edit <code>src/app.tsx</code> and save to reload.
+          </p>
+          <article>
+            BUT hot reload is currently{" "}
+            <code>
+              <strong>NOT</strong>
+            </code>{" "}
+            supported.
+          </article>
+          <p>The UI loses all React states when you save file for a reload.</p>
+          <a
+            className="App-link"
+            href="https://reactjs.org"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Learn React
+          </a>
+          <p>
+            You can install any third-party <code>npm</code> packages avaliable
+            in browser for the UI sub-project, such as{" "}
+            <code>@material-ui/core</code>.
+          </p>
+          <div
+            style={{
+              display: "flex",
+              width: "600px",
+              height: "50px",
+              justifyContent: "space-around",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              color="primary"
+              variant="outlined"
+              onClick={() => {
+                setCount(count + 1);
+              }}
+            >
+              use react hooks! count = {count}
+            </Button>
+            <Button
+              color="secondary"
+              variant="outlined"
+              onClick={async () => {
+                try {
+                  const result = await window.SessionInvoker.logInput(
+                    `Current count in React UI is ${count}!`
+                  );
+                  console.log("returned message", result);
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+            >
+              send count to extension
+            </Button>
+          </div>
+          <p>
+            The following is a state saved by extension (Here we used a Date
+            string for example).
+          </p>
+          <p
+            style={
+              loading
+                ? {}
+                : { padding: "10px", border: `2px solid ${colors.lime[300]}` }
+            }
+          >
+            {loading ? <CircularProgress /> : dateStore.date}
+          </p>
+          <p>
+            This state is avaliable until the extension is deactivated (can be
+            recovered if you close the webview panel and then open it).
+          </p>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => {
+              setDateStore("date", new Date().toString());
+            }}
+          >
+            store current date to extension session level
+          </Button>
+          <p>
+            Here are also some convenient APIs for attaching to events of
+            extension.
+          </p>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => {
+              window.SessionHubs.emit("chat", "UI dispatched!");
+            }}
+          >
+            Click Material UI Button to dispatch event
+          </Button>
+        </header>
+      </div>
+    </ThemeProvider>
   );
 };

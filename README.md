@@ -39,8 +39,8 @@ Then press `F5` in `vscode`, and you will see the demo UI in a new `vscode` wind
 
 ## TODO
 
-- Better CSS support
-- Better communication API
+- Better CSS support ------ maybe using [`snowpack`](https://www.snowpack.dev/)
+- Bundle communication APIs to a library or npm package
 - Fix issue of reload
 
 **Enjoy!**

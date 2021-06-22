@@ -35,7 +35,7 @@ export class WebviewManager implements vscode.Disposable {
       console.warn("Please open panel first!");
       return;
     }
-    // TODO Use webpack to make it easier.
+    // TODO Use snowpack to make it easier.
     this.panel.webview.html = fs
       .readFileSync(
         path.join(
