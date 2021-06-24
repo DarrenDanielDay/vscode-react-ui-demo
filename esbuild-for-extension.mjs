@@ -10,11 +10,13 @@ import fs from "fs";
 const devEnv = {
   ENV: "dev",
   STATIC_FILE_BASE_DIR_NAMES: ["src", "react-ui", "dist"],
+  EXTENSION_BASE_NAME: "vscode-react-ui-demo",
 };
 /** @type {import("@esbuild-env").ESBuildEnv} */
 const prodEnv = {
   ENV: "prod",
   STATIC_FILE_BASE_DIR_NAMES: ["out", "ui"],
+  EXTENSION_BASE_NAME: "vscode-react-ui-demo",
 };
 //#endregion
 

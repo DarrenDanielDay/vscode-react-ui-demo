@@ -1,3 +1,4 @@
+import env from "@esbuild-env";
 import * as vscode from "vscode";
 import { CoreAPI } from "../react-ui/message-protocol";
 import { Controller, Inject } from "./controller-decorator";
@@ -13,12 +14,12 @@ export class CoreController implements CoreAPI {
     return this.stateMap.get(key);
   }
   @Inject.singleton(() =>
-    vscode.window.createOutputChannel("vscode-react-ui-demo Logger")
+    vscode.window.createOutputChannel(`${env.EXTENSION_BASE_NAME} Logger`)
   )
   private readonly channel!: vscode.OutputChannel;
   logInput(params: string): string {
     this.channel.appendLine(params);
     this.channel.show();
-    return `The log <${params}> has been logged into OUTPUT "vscode-react-ui-demo Logger". You can find them by "Ctrl + Shift + U" `;
+    return `The log <${params}> has been logged into OUTPUT "${env.EXTENSION_BASE_NAME} Logger". You can find them by "Ctrl + Shift + U" `;
   }
 }

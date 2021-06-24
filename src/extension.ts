@@ -7,6 +7,7 @@ import { WebviewManager } from "./react-ui/extension-handler";
 import { Inject } from "./controller/controller-decorator";
 import "./controller";
 import { HubManager } from "./hubs/hub-manager";
+import { Commands } from "./commands";
 let uiBuildProcess: child_process.ChildProcess | null = null;
 export function activate(context: vscode.ExtensionContext) {
   Inject.context = context;
@@ -36,26 +37,26 @@ export function activate(context: vscode.ExtensionContext) {
   });
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "vscode-react-ui-demo.open",
+      Commands.WebviewControll.Open,
       open.bind(webviewManager, context)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "vscode-react-ui-demo.close",
+      Commands.WebviewControll.Close,
       close.bind(webviewManager, context)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "vscode-react-ui-demo.reload",
+      Commands.WebviewControll.Reload,
       reload.bind(webviewManager, context)
     )
   );
   if (env.ENV === "dev") {
     startUIDevMode(context, webviewManager).then(() => {
       console.log("Successfully built React UI resources");
-      vscode.commands.executeCommand("vscode-react-ui-demo.open").then(() => {
+      vscode.commands.executeCommand(Commands.WebviewControll.Open).then(() => {
         console.log("Successfully opened webview");
       });
     });
