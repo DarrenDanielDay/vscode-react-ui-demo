@@ -21,6 +21,8 @@ git clone https://github.com/DarrenDanielDay/vscode-react-ui-demo.git
 code vscode-react-ui-demo           # This command opens a `vscode` window.
 ```
 
+If you want to see the minimum example, you can switch to branch [`minimum-example`](https://github.com/DarrenDanielDay/vscode-react-ui-demo/tree/minimum-example).
+
 In the opened `vscode` window, open the integrated terminal and run the following to build and develop the react UI:
 
 ```sh
