@@ -8,7 +8,8 @@
   "private": false,
   "scripts": {
     "watch:types": "yarn tsc -w --noEmit",
-    "start": "node esbuild-for-ui.mjs --dev"
+    "start": "snowpack dev",
+    "build": "snowpack build"
   },
   "devDependencies": {
     "@types/react": "^17.0.3",

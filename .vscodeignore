@@ -1,6 +1,7 @@
 out/test/**
 src/**
 .gitignore
+.prettierignore
 .yarnrc
 .husky/**
 **/tsconfig.json

@@ -74,7 +74,7 @@
     "format": "prettier --write .",
     "lint:fix": "pretty-quick --staged",
     "lint:types": "tsc --noEmit -p ./ && cd ./src/react-ui && tsc --noEmit -p ./",
-    "build": "node ./esbuild-for-extension.mjs && node ./src/react-ui/esbuild-for-ui.mjs",
+    "build": "node ./esbuild-for-extension.mjs && cd ./src/react-ui && yarn build",
     "bundle": "git clean -xdf && yarn && yarn vsce package"
   },
   "devDependencies": {
