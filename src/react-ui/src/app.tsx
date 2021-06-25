@@ -125,15 +125,7 @@ export const App: React.FC = () => {
             The following is a state saved by extension (Here we used a Date
             string for example).
           </p>
-          <p
-            style={
-              loading || !dateStore.date
-                ? {}
-                : { padding: "10px", border: `2px solid ${colors.lime[300]}` }
-            }
-          >
-            {loading ? <CircularProgress /> : dateStore.date || "null"}
-          </p>
+          <p>{loading ? <CircularProgress /> : dateStore.date || "null"}</p>
           <p>
             This state is avaliable until the extension is deactivated (can be
             recovered if you close the webview panel and then open it).

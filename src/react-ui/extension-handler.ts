@@ -61,7 +61,7 @@ export class WebviewManager implements vscode.Disposable {
       const { port } = this.devServer;
       const host = `http://localhost:${port}`;
       http.get(host, (res) => {
-        const body: string[] = [];
+        const body: Buffer[] = [];
         res.on("data", (chunk) => {
           body.push(chunk);
         });
