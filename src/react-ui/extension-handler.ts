@@ -1,11 +1,14 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
+import * as http from "http";
 import env from "@esbuild-env";
+import type { SnowpackDevServer } from "snowpack";
 /**
  * Manage a single webview.
  */
 export class WebviewManager implements vscode.Disposable {
+  devServer?: SnowpackDevServer;
   panel: vscode.WebviewPanel | undefined;
   public messageHandler?: Parameters<vscode.Webview["onDidReceiveMessage"]>[0];
   open(context: vscode.ExtensionContext) {
@@ -35,19 +38,45 @@ export class WebviewManager implements vscode.Disposable {
       console.warn("Please open panel first!");
       return;
     }
-    // TODO Use snowpack to make it easier.
-    this.panel.webview.html = fs
-      .readFileSync(
-        path.join(
-          context.extensionPath,
-          ...env.STATIC_FILE_BASE_DIR_NAMES,
-          "index.html"
+    const webview = this.panel.webview;
+    if (env.ENV === "prod") {
+      webview.html = fs
+        .readFileSync(
+          path.join(
+            context.extensionPath,
+            ...env.STATIC_FILE_BASE_DIR_NAMES,
+            "index.html"
+          )
         )
-      )
-      .toString("utf-8")
-      .replace("%HASH%", +new Date() + "")
-      .replace("%INDEX_JS%", this.staticFileUrlString(context, "index.js"))
-      .replace("%APP_CSS%", this.staticFileUrlString(context, "index.css"));
+        .toString("utf-8")
+        .replace("%HASH%", +new Date() + "")
+        .replace("./index.js", this.staticFileUrlString(context, "index.js"));
+    } else {
+      if (!this.devServer) {
+        vscode.window.showWarningMessage(
+          "Development Server is not ready currently"
+        );
+        return;
+      }
+      const { port } = this.devServer;
+      const host = `http://localhost:${port}`;
+      http.get(host, (res) => {
+        const body: string[] = [];
+        res.on("data", (chunk) => {
+          body.push(chunk);
+        });
+        res.on("end", () => {
+          webview.html = body
+            .join("")
+            .replace("./index.js", `${host}/index.js`)
+            .replace("%HASH%", +new Date() + "")
+            .replace(
+              "<!-- SOCKET URL INJECTION DO NOT MODIFY -->",
+              `<script>window.HMR_WEBSOCKET_URL="ws://localhost:${port}/"</script>`
+            );
+        });
+      });
+    }
   }
 
   private staticFileUrlString(

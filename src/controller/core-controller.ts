@@ -1,6 +1,6 @@
 import env from "@esbuild-env";
 import * as vscode from "vscode";
-import { CoreAPI } from "../react-ui/message-protocol";
+import type { CoreAPI } from "../react-ui/message-protocol";
 import { Controller, Inject } from "./controller-decorator";
 
 @Controller

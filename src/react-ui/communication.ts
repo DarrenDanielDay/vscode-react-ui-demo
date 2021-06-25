@@ -1,4 +1,4 @@
-import { PropertyKeys } from "taio/build/types/concepts";
+import type { PropertyKeys } from "taio/build/types/concepts";
 
 export type MessageType = "request" | "response" | "event" | "error";
 

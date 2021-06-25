@@ -1,4 +1,4 @@
-import { AccessByPath, AccessPaths } from "taio/build/types/object";
+import type { AccessByPath, AccessPaths } from "taio/build/types/object";
 
 export function toJSON(obj: unknown): string {
   return JSON.stringify(obj);

@@ -27,7 +27,7 @@ const isDev = process.argv.includes("--dev");
 const extensionCommonBuildOptions = {
   platform: "node",
   entryPoints: [path.resolve("src", "extension.ts")],
-  external: ["vscode"],
+  external: ["vscode", "snowpack", "esbuild"],
   outdir: path.resolve("out"),
   plugins: [
     {

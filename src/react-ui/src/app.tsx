@@ -8,6 +8,8 @@ import {
 } from "@material-ui/core";
 import { useStoredState } from "./hooks/use-stored-state";
 import logo from "./logo.svg";
+import github from "./github.jpg";
+import styles from "./index.module.css";
 
 function delay(seconds: number) {
   return new Promise<void>((resolve) => {
@@ -59,22 +61,20 @@ export const App: React.FC = () => {
   }, []);
   return (
     <ThemeProvider theme={theme}>
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
+      <div className={styles.App}>
+        <header className={styles["App-header"]}>
+          <img src={logo} className={styles["App-logo"]} alt="logo" />
+          <a
+            href="https://github.com/DarrenDanielDay/vscode-react-ui-demo"
+            className={styles["github-link"]}
+          >
+            <img src={github} className={styles.github} alt="github" />
+          </a>
           <p>
             Edit <code>src/app.tsx</code> and save to reload.
           </p>
-          <article>
-            BUT hot reload is currently{" "}
-            <code>
-              <strong>NOT</strong>
-            </code>{" "}
-            supported.
-          </article>
-          <p>The UI loses all React states when you save file for a reload.</p>
           <a
-            className="App-link"
+            className={styles["App-link"]}
             href="https://reactjs.org"
             target="_blank"
             rel="noopener noreferrer"
@@ -127,12 +127,12 @@ export const App: React.FC = () => {
           </p>
           <p
             style={
-              loading
+              loading || !dateStore.date
                 ? {}
                 : { padding: "10px", border: `2px solid ${colors.lime[300]}` }
             }
           >
-            {loading ? <CircularProgress /> : dateStore.date}
+            {loading ? <CircularProgress /> : dateStore.date || "null"}
           </p>
           <p>
             This state is avaliable until the extension is deactivated (can be

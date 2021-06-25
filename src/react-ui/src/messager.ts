@@ -1,15 +1,15 @@
-import type {
-  AnyMessage,
-  Event,
-  Message,
-  Request,
-  Response,
-} from "../communication";
+import type { AnyMessage, Event, Request, Response } from "../communication";
 import type { AccessByPath, AccessPaths } from "taio/build/types/object";
 import type { AnyFunc, PropertyKeys } from "taio/build/types/concepts";
 import type { CoreAPI, CoreHubEvents } from "../message-protocol";
-// @ts-ignore
-const vscode: { postMessage(params: Message<any>): any } = acquireVsCodeApi();
+
+if (typeof acquireVsCodeApi !== "function") {
+  alert(
+    "You need to run this app in vscode's webview. Some APIs are not available in browsers."
+  );
+}
+
+const vscode = acquireVsCodeApi();
 
 export interface PromiseHandler<T> {
   resolve(data: T): void;

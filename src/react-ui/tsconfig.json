@@ -18,6 +18,8 @@
     "moduleResolution": "Node",
     "target": "ESNext",
     "jsx": "react",
+    "isolatedModules": true,
+    "importsNotUsedAsValues": "error",
     "skipLibCheck": true,
     "lib": ["DOM", "ES2019"]
   },

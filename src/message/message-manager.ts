@@ -1,6 +1,6 @@
 import { ControllerManager } from "../controller/controller-decorator";
 import { HubManager } from "../hubs/hub-manager";
-import { Event, Message, Request } from "../react-ui/communication";
+import type { Event, Message, Request } from "../react-ui/communication";
 
 export class MessageManager {
   private static _instance?: MessageManager;

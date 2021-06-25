@@ -2,7 +2,7 @@ import ReactDOM from "react-dom";
 import React from "react";
 import { MessageManager } from "./messager";
 import { App } from "./app";
-import { Hub } from "../communication";
+import type { Hub } from "../communication";
 
 window.addEventListener("message", MessageManager.instance.listener);
 const noop = () => {

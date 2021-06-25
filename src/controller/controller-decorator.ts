@@ -1,6 +1,6 @@
 import type { Error, Request, Response } from "../react-ui/communication";
 import { access, toJSON } from "../utils";
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 interface ControllerConstructor {
   new (): unknown;
 }
