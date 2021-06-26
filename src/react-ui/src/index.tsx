@@ -60,4 +60,4 @@ window.SessionHubs = new Proxy(
     },
   }
 ) as never;
-ReactDOM.render(<App></App>, document.getElementById("app"));
+ReactDOM.render(<App></App>, document.getElementById("root"));

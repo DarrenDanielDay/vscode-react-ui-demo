@@ -8,7 +8,7 @@ if (typeof acquireVsCodeApi !== "function") {
   );
 }
 
-const vscode = acquireVsCodeApi();
+window.vscodeAPI = acquireVsCodeApi();
 
 export interface PromiseHandler<T> {
   resolve(data: T): void;
@@ -63,7 +63,7 @@ export class MessageManager {
         id,
         type: "request",
       };
-      vscode.postMessage(request);
+      window.vscodeAPI.postMessage(request);
     });
   }
 
@@ -77,7 +77,7 @@ export class MessageManager {
       payload,
       type: "event",
     };
-    vscode.postMessage(event);
+    window.vscodeAPI.postMessage(event);
   }
 
   onEvent<K extends PropertyKeys<CoreHubEvents>>(

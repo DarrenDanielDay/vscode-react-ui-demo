@@ -10,12 +10,12 @@ import { startSnowpackDev } from "./dev/snowpack-dev";
 
 export function activate(context: vscode.ExtensionContext) {
   Inject.context = context;
-  const webviewManager = new WebviewManager();
+  const webviewManager = new WebviewManager(context);
   context.subscriptions.push(webviewManager);
   context.subscriptions.push(HubManager.instance);
   const { open: doOpen, reload, close } = webviewManager;
   const open = function (this: WebviewManager, ctx: vscode.ExtensionContext) {
-    doOpen.call(this, ctx);
+    doOpen.call(this);
     webviewManager.messageHandler ||
       webviewManager.attach(MessageManager.instance.messageHandler);
     HubManager.instance.attach(webviewManager.panel!.webview);
@@ -37,19 +37,19 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Open,
-      open.bind(webviewManager, context)
+      open.bind(webviewManager)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Close,
-      close.bind(webviewManager, context)
+      close.bind(webviewManager)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Reload,
-      reload.bind(webviewManager, context)
+      reload.bind(webviewManager)
     )
   );
   if (env.ENV === "dev") {

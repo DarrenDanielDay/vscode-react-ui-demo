@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import * as fs from "fs";
+import * as fs from "fs/promises";
 import * as path from "path";
 import * as http from "http";
 import env from "@esbuild-env";
@@ -11,7 +11,8 @@ export class WebviewManager implements vscode.Disposable {
   devServer?: SnowpackDevServer;
   panel: vscode.WebviewPanel | undefined;
   public messageHandler?: Parameters<vscode.Webview["onDidReceiveMessage"]>[0];
-  open(context: vscode.ExtensionContext) {
+  constructor(public readonly context: vscode.ExtensionContext) {}
+  open() {
     if (this.panel) {
       return;
     }
@@ -22,7 +23,9 @@ export class WebviewManager implements vscode.Disposable {
       {
         enableScripts: true,
         retainContextWhenHidden: true,
-        localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath))],
+        localResourceRoots: [
+          vscode.Uri.file(path.join(this.context.extensionPath)),
+        ],
       }
     );
 
@@ -30,27 +33,26 @@ export class WebviewManager implements vscode.Disposable {
       this.panel = undefined;
       this.detach();
     });
-    this.reload(context);
+    this.reload();
   }
 
-  reload(context: vscode.ExtensionContext) {
+  async reload() {
     if (!this.panel) {
       console.warn("Please open panel first!");
       return;
     }
-    const webview = this.panel.webview;
+    let html: string;
+    let baseUrl: string;
     if (env.ENV === "prod") {
-      webview.html = fs
-        .readFileSync(
-          path.join(
-            context.extensionPath,
-            ...env.STATIC_FILE_BASE_DIR_NAMES,
-            "index.html"
-          )
+      baseUrl = this.staticFileUrlString("index.js").replace(/\/index.js$/, "");
+      const buffer = await fs.readFile(
+        path.join(
+          this.context.extensionPath,
+          ...env.STATIC_FILE_BASE_DIR_NAMES,
+          "index.html"
         )
-        .toString("utf-8")
-        .replace("%HASH%", +new Date() + "")
-        .replace("./index.js", this.staticFileUrlString(context, "index.js"));
+      );
+      html = buffer.toString("utf-8");
     } else {
       if (!this.devServer) {
         vscode.window.showWarningMessage(
@@ -59,35 +61,31 @@ export class WebviewManager implements vscode.Disposable {
         return;
       }
       const { port } = this.devServer;
-      const host = `http://localhost:${port}`;
-      http.get(host, (res) => {
-        const body: Buffer[] = [];
-        res.on("data", (chunk) => {
-          body.push(chunk);
-        });
-        res.on("end", () => {
-          webview.html = body
-            .join("")
-            .replace("./index.js", `${host}/index.js`)
-            .replace("%HASH%", +new Date() + "")
-            .replace(
-              "<!-- SOCKET URL INJECTION DO NOT MODIFY -->",
-              `<script>window.HMR_WEBSOCKET_URL="ws://localhost:${port}/"</script>`
+      baseUrl = `http://localhost:${port}`;
+      html = await new Promise((resolve, reject) => {
+        http.get(baseUrl, (res) => {
+          const body: Buffer[] = [];
+          res.on("data", (chunk) => {
+            body.push(chunk);
+          });
+          res.on("end", () => {
+            resolve(
+              body
+                .map((buffer) => buffer.toString("utf-8"))
+                .join("")
+                .replace(
+                  "<!-- SOCKET URL INJECTION DO NOT MODIFY -->",
+                  `<script>window.HMR_WEBSOCKET_URL="ws://localhost:${port}/"</script>`
+                )
             );
+          });
         });
       });
     }
-  }
-
-  private staticFileUrlString(
-    context: vscode.ExtensionContext,
-    ...paths: string[]
-  ): string {
-    return urlOfFile(
-      this.panel!,
-      context,
-      path.join(...env.STATIC_FILE_BASE_DIR_NAMES, ...paths)
-    );
+    html = this.processUrlOfHtml(html, baseUrl);
+    // A <meta> element with hash is designed to ensure the webview to reload.
+    html = this.processHashOfHtml(html);
+    this.panel.webview.html = html;
   }
 
   close() {
@@ -122,10 +120,42 @@ export class WebviewManager implements vscode.Disposable {
   detach() {
     this.messageHandler = undefined;
     this.attachResource?.dispose();
+    this.attachResource = undefined;
   }
 
   dispose() {
     this.close();
+  }
+
+  private processUrlOfHtml(html: string, baseUrl: string): string {
+    return html.replace(
+      /((?:src)|(?:href))=('|")(.*?)\2/g,
+      (substr, attr: string, _quote, urlPath: string) => {
+        try {
+          // Test if the url is supported by vscode
+          vscode.Uri.parse(urlPath, true);
+        } catch {
+          const fullUrl = urlPath.startsWith("/")
+            ? `${baseUrl}${urlPath}`
+            : `${baseUrl}${urlPath.replace(/^\./, "")}`;
+          return `${attr}="${fullUrl}"`;
+        }
+        // If the url appear to be a valid uri with scheme or cannot be handled, no replacement are performed.
+        return substr;
+      }
+    );
+  }
+
+  private processHashOfHtml(html: string): string {
+    return html.replace("%HASH%", +new Date() + "");
+  }
+
+  private staticFileUrlString(...paths: string[]): string {
+    return urlOfFile(
+      this.panel!,
+      this.context,
+      path.join(...env.STATIC_FILE_BASE_DIR_NAMES, ...paths)
+    );
   }
 }
 
