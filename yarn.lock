@@ -2140,11 +2140,6 @@ supports-color@^7.1.0:
   dependencies:
     has-flag "^4.0.0"
 
-taio@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/taio/-/taio-0.3.0.tgz#d1e1825408c110dd23ab8fb465c61537f4d676fd"
-  integrity sha512-XkBkT10ClG7U8aHK3MCZEjOM9c1Nh6fWLX8L4JiXtexZpMJLtePtbK6Z5jA4LwcVbd2cBr8bLcnQMB6wc800Tg==
-
 tar@^6.0.2, tar@^6.1.0:
   version "6.1.0"
   resolved "https://registry.npmjs.org/tar/-/tar-6.1.0.tgz#d1724e9bcc04b977b18d5c573b333a2207229a83"

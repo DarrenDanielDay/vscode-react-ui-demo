@@ -1,7 +1,6 @@
+import type { PropertyKeys } from "../../utils/types/property-key";
 import type { AnyMessage, Event, Request, Response } from "../communication";
-import type { AccessByPath, AccessPaths } from "taio/build/types/object";
-import type { AnyFunc, PropertyKeys } from "taio/build/types/concepts";
-import type { CoreAPI, CoreHubEvents } from "../message-protocol";
+import type { CoreHubEvents } from "../message-protocol";
 
 if (typeof acquireVsCodeApi !== "function") {
   alert(
@@ -50,15 +49,13 @@ export class MessageManager {
     reject?.(error);
     this.messageQueue.delete(seq);
   }
-  async request<K extends AccessPaths<CoreAPI>>(
-    path: K,
-    payload: Parameters<Extract<AccessByPath<CoreAPI, K>, AnyFunc>>
-  ): Promise<Response<ReturnType<Extract<AccessByPath<CoreAPI, K>, AnyFunc>>>> {
+  async request(
+    path: string[],
+    payload: unknown[]
+  ): Promise<Response<unknown>> {
     return new Promise((resolve, reject) => {
       const id = this.enqueue({ resolve, reject });
-      const request: Request<
-        Parameters<Extract<AccessByPath<CoreAPI, K>, AnyFunc>>
-      > = {
+      const request: Request<unknown[]> = {
         payload: {
           path,
           args: payload,

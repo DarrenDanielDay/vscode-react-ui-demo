@@ -5,6 +5,8 @@ import { Controller, Inject } from "./controller-decorator";
 
 @Controller
 export class CoreController implements CoreAPI {
+  @Inject.singleton(() => vscode)
+  vscode!: typeof vscode;
   @Inject.singleton(() => new Map<string, unknown>())
   private readonly stateMap!: Map<string, unknown>;
   setState(key: string, value: unknown): void {

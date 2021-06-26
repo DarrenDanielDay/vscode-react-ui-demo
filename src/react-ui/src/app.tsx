@@ -25,6 +25,13 @@ const theme = createMuiTheme({
   },
 });
 
+const row = {
+  display: "flex",
+  width: "600px",
+  height: "50px",
+  justifyContent: "space-around",
+  alignItems: "center",
+};
 export const App: React.FC = () => {
   const [count, setCount] = useState(0);
   const [dateStore, setDateStore, loading] = useStoredState(
@@ -86,15 +93,7 @@ export const App: React.FC = () => {
             in browser for the UI sub-project, such as{" "}
             <code>@material-ui/core</code>.
           </p>
-          <div
-            style={{
-              display: "flex",
-              width: "600px",
-              height: "50px",
-              justifyContent: "space-around",
-              alignItems: "center",
-            }}
-          >
+          <div style={row}>
             <Button
               color="primary"
               variant="outlined"
@@ -140,18 +139,36 @@ export const App: React.FC = () => {
             store current date to extension session level
           </Button>
           <p>
-            Here are also some convenient APIs for attaching to events of
+            Here are also some convenient APIs for communication between UI and
             extension.
           </p>
-          <Button
-            color="primary"
-            variant="contained"
-            onClick={() => {
-              window.SessionHubs.emit("chat", "UI dispatched!");
-            }}
-          >
-            Click Material UI Button to dispatch event
-          </Button>
+          <div style={row}>
+            <Button
+              color="secondary"
+              variant="contained"
+              onClick={() => {
+                window.SessionInvoker.vscode.window.showInformationMessage(
+                  "Hello, called vscode.window.showInformationMessage API!",
+                  {}
+                );
+              }}
+            >
+              Click to toast message
+            </Button>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => {
+                window.SessionHubs.emit("chat", "UI dispatched!");
+              }}
+            >
+              Click to dispatch event
+            </Button>
+          </div>
+          <p>
+            If you do not need these complicated code, you can switch to branch{" "}
+            <code>minimum-example</code> to see a simpler example.
+          </p>
         </header>
       </div>
     </ThemeProvider>

@@ -32,7 +32,6 @@ window.SessionInvoker = new Proxy(
   {
     get(_target, key: string) {
       return createTrackerProxy([key], (path, argArray) => {
-        // @ts-expect-error
         return MessageManager.instance.request(path, argArray);
       });
     },

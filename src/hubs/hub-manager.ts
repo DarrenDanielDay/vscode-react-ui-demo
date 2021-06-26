@@ -1,7 +1,8 @@
-import type { PropertyKeys } from "taio/build/types/concepts";
 import type * as vscode from "vscode";
 import type { Event, Hub } from "../react-ui/communication";
 import type { CoreHubEvents } from "../react-ui/message-protocol";
+import type { PropertyKeys } from "../utils/types/property-key";
+
 export class HubDispatcher<T> implements Hub<T>, vscode.Disposable {
   private handlersMap = new Map<
     PropertyKeys<T>,
