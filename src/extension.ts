@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import env from "@esbuild-env";
 import { MessageManager } from "./message/message-manager";
-import { WebviewManager } from "./react-ui/extension-handler";
+import { WebviewManager } from "./webview-handler";
 import { Inject } from "./controller/controller-decorator";
 import "./controller";
 import { HubManager } from "./hubs/hub-manager";
