@@ -27,7 +27,7 @@ const theme = createMuiTheme({
 
 const row = {
   display: "flex",
-  width: "600px",
+  width: "800px",
   height: "50px",
   justifyContent: "space-around",
   alignItems: "center",
@@ -59,7 +59,7 @@ export const App: React.FC = () => {
   );
   useEffect(() => {
     const handler = (message: string) => {
-      console.log("UI", message);
+      console.log("UI received chat event message:", message);
     };
     window.SessionHubs.on("chat", handler);
     return () => {
@@ -119,12 +119,23 @@ export const App: React.FC = () => {
             >
               send count to extension
             </Button>
+            <Button
+              color="inherit"
+              variant="outlined"
+              onClick={() => {
+                window.SessionInvoker.vscode.commands.executeCommand(
+                  "workbench.action.webview.openDeveloperTools"
+                );
+              }}
+            >
+              open devtools
+            </Button>
           </div>
           <p>
             The following is a state saved by extension (Here we used a Date
             string for example).
           </p>
-          <p>{loading ? <CircularProgress /> : dateStore.date || "null"}</p>
+          <div>{loading ? <CircularProgress /> : dateStore.date || "null"}</div>
           <p>
             This state is avaliable until the extension is deactivated (can be
             recovered if you close the webview panel and then open it).
@@ -155,11 +166,12 @@ export const App: React.FC = () => {
             >
               Click to toast message
             </Button>
+
             <Button
               color="primary"
               variant="contained"
               onClick={() => {
-                window.SessionHubs.emit("chat", "UI dispatched!");
+                window.SessionHubs.emit("chat", "Dispatched by UI");
               }}
             >
               Click to dispatch event
@@ -167,7 +179,13 @@ export const App: React.FC = () => {
           </div>
           <p>
             If you do not need these complicated code, you can switch to branch{" "}
-            <code>minimum-example</code> to see a simpler example.
+            <a
+              href="https://github.com/DarrenDanielDay/vscode-react-ui-demo/tree/minimum-example"
+              className={styles["App-link"]}
+            >
+              minimum-example
+            </a>{" "}
+            to see a simpler example.
           </p>
         </header>
       </div>

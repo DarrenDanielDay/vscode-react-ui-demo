@@ -25,14 +25,14 @@ export function activate(context: vscode.ExtensionContext) {
       "chat",
       "Dispatched by interval in extension"
     );
-  }, 3000);
+  }, 10000);
   context.subscriptions.push({
     dispose() {
       clearInterval(interval);
     },
   });
   HubManager.instance.dipatcher.on("chat", (message) => {
-    console.log("extension listener", message);
+    console.log("Extension received chat event message:", message);
   });
   context.subscriptions.push(
     vscode.commands.registerCommand(
