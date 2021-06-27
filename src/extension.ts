@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(webviewManager);
   context.subscriptions.push(HubManager.instance);
   const { open: doOpen, reload, close } = webviewManager;
-  const open = function (this: WebviewManager, ctx: vscode.ExtensionContext) {
+  const open = function (this: WebviewManager) {
     doOpen.call(this);
     webviewManager.messageHandler ||
       webviewManager.attach(MessageManager.instance.messageHandler);

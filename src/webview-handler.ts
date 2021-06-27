@@ -12,7 +12,7 @@ export class WebviewManager implements vscode.Disposable {
   panel: vscode.WebviewPanel | undefined;
   public messageHandler?: Parameters<vscode.Webview["onDidReceiveMessage"]>[0];
   constructor(public readonly context: vscode.ExtensionContext) {}
-  open() {
+  async open() {
     if (this.panel) {
       return;
     }
@@ -33,7 +33,7 @@ export class WebviewManager implements vscode.Disposable {
       this.panel = undefined;
       this.detach();
     });
-    this.reload();
+    await this.reload();
   }
 
   async reload() {
@@ -44,7 +44,7 @@ export class WebviewManager implements vscode.Disposable {
     let html: string;
     let baseUrl: string;
     if (env.ENV === "prod") {
-      baseUrl = this.staticFileUrlString("index.js").replace(/\/index.js$/, "");
+      baseUrl = this.staticFileUrlString("index.js").replace(/index.js$/, "");
       const buffer = await fs.readFile(
         path.join(
           this.context.extensionPath,
@@ -60,7 +60,8 @@ export class WebviewManager implements vscode.Disposable {
         );
         return;
       }
-      const { port } = this.devServer;
+      const { devServer } = this;
+      const { port } = devServer;
       baseUrl = `http://localhost:${port}`;
       html = await new Promise((resolve, reject) => {
         http.get(baseUrl, (res) => {
@@ -69,19 +70,27 @@ export class WebviewManager implements vscode.Disposable {
             body.push(chunk);
           });
           res.on("end", () => {
-            resolve(
-              body
-                .map((buffer) => buffer.toString("utf-8"))
-                .join("")
-                .replace(
-                  "<!-- SOCKET URL INJECTION DO NOT MODIFY -->",
-                  `<script>window.HMR_WEBSOCKET_URL="ws://localhost:${port}/"</script>`
-                )
-            );
+            const resbonseBody = body
+              .map((buffer) => buffer.toString("utf-8"))
+              .join("");
+            if (devServer.hmrEngine) {
+              // Snowpack's HMR socket is calculated with `location.hostname` by default.
+              // This is incorrect in vscode's webview.
+              const withHmrSocketUrl = resbonseBody.replace(
+                "<!-- HMR SOCKET URL INJECTION DO NOT MODIFY -->",
+                `<script>window.HMR_WEBSOCKET_URL="ws://localhost:${
+                  devServer.hmrEngine.port ?? port
+                }/"</script>`
+              );
+              resolve(withHmrSocketUrl);
+            } else {
+              resolve(resbonseBody);
+            }
           });
         });
       });
     }
+    // A <base> element with correct base url.
     html = this.processUrlOfHtml(html, baseUrl);
     // A <meta> element with hash is designed to ensure the webview to reload.
     html = this.processHashOfHtml(html);
@@ -125,25 +134,11 @@ export class WebviewManager implements vscode.Disposable {
 
   dispose() {
     this.close();
+    this.devServer = undefined;
   }
 
   private processUrlOfHtml(html: string, baseUrl: string): string {
-    return html.replace(
-      /((?:src)|(?:href))=('|")(.*?)\2/g,
-      (substr, attr: string, _quote, urlPath: string) => {
-        try {
-          // Test if the url is supported by vscode
-          vscode.Uri.parse(urlPath, true);
-        } catch {
-          const fullUrl = urlPath.startsWith("/")
-            ? `${baseUrl}${urlPath}`
-            : `${baseUrl}${urlPath.replace(/^\./, "")}`;
-          return `${attr}="${fullUrl}"`;
-        }
-        // If the url appear to be a valid uri with scheme or cannot be handled, no replacement are performed.
-        return substr;
-      }
-    );
+    return html.replace("%BASE_URL%", baseUrl);
   }
 
   private processHashOfHtml(html: string): string {

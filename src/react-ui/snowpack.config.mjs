@@ -3,10 +3,11 @@
 // See all supported options: https://www.snowpack.dev/reference/configuration
 /** @type {import("snowpack").SnowpackUserConfig } */
 const config = {
+  root: "./",
   mount: {
     src: { url: "/" },
   },
-  plugins: ["@snowpack/plugin-react-refresh", "./data-url-esbuild-loader"],
+  plugins: ["@snowpack/plugin-react-refresh"],
   packageOptions: {
     /* ... */
   },
@@ -20,6 +21,7 @@ const config = {
   },
   buildOptions: {
     out: "../../out/ui",
+    baseUrl: "./",
   },
 };
 

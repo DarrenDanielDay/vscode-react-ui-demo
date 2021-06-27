@@ -3,25 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- BASE URL FOR WEBVIEW DO NOT MODIFY -->
+    <base href="%BASE_URL%" />
     <!-- META WITH HASH FOR RELOAD DO NOT MODIFY -->
     <meta name="generator" content="%HASH%" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- SOCKET URL INJECTION DO NOT MODIFY -->
+    <!-- HMR SOCKET URL INJECTION DO NOT MODIFY -->
     <title>React App</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this application.</noscript>
     <div id="root"></div>
-    <!-- ENTRY POINT INJECTION DO NOT MODIFY -->
+    <!-- ENTRY POINT DO NOT MODIFY -->
     <script src="./index.js" type="module"></script>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
 
-      You CANNOT add other resources with relative path EXCEPT JavaScript file.
-      Those resources cannot be loaded correctly.
-      You need to load them via `data-url-esbuild-loader`.
-      But you can add any resources from web, like CDN scripts, images, fonts and soon.
+      You can add webfonts, meta tags, or analytics to this file.
+      The ESM scripts will be correctly loaded in vscode's webview.
 
       To begin the development, press `F5` in vscode.
       To create a production bundle, use `yarn bundle`.
