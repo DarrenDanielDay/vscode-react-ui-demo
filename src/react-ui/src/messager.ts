@@ -6,6 +6,21 @@ if (typeof acquireVsCodeApi !== "function") {
   alert(
     "You need to run this app in vscode's webview. Some APIs are not available in browsers."
   );
+  // Polyfill to prevent errors.
+  (() => {
+    let _state: any;
+    window.acquireVsCodeApi = () => ({
+      getState() {
+        return _state;
+      },
+      setState(state) {
+        _state = state;
+      },
+      postMessage() {
+        console.warn("vscode.postMessage is not available");
+      },
+    });
+  })();
 }
 
 window.vscodeAPI = acquireVsCodeApi();
