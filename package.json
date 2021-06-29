@@ -75,7 +75,7 @@
     "lint:fix": "pretty-quick --staged",
     "lint:types": "tsc --noEmit -p ./ && cd ./src/react-ui && tsc --noEmit -p ./",
     "build": "node ./esbuild-for-extension.mjs && cd ./src/react-ui && yarn build",
-    "bundle": "git clean -xdf && yarn && yarn vsce package"
+    "bundle": "yarn vsce package"
   },
   "devDependencies": {
     "@snowpack/plugin-react-refresh": "^2.5.0",

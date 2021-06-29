@@ -20,6 +20,7 @@ const config = {
     hmr: true,
   },
   buildOptions: {
+    clean: true,
     out: "../../out/ui",
     baseUrl: "./",
   },

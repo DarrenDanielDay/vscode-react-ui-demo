@@ -49,8 +49,6 @@ Just one command in the root folder to make a production build:
 yarn bundle
 ```
 
-> To minify the bundle, this command includes `git clean -xdf` to remove files excluded by `.gitignore`. **TAKE CARE** to run this command if you have **UNTRACKED FILES**!!!
-
 ## How it works
 
 Used [`esbuild`](https://esbuild.github.io/) for compiling [`typescript`](https://www.typescriptlang.org/) extension source code.
