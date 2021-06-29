@@ -13,27 +13,27 @@ export class WebviewManager implements vscode.Disposable {
   public messageHandler?: Parameters<vscode.Webview["onDidReceiveMessage"]>[0];
   constructor(public readonly context: vscode.ExtensionContext) {}
   async open() {
-    if (this.panel) {
-      return;
-    }
-    this.panel = vscode.window.createWebviewPanel(
-      "react-ui",
-      "Extension UI by React",
-      vscode.ViewColumn.One,
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-        localResourceRoots: [
-          vscode.Uri.file(path.join(this.context.extensionPath)),
-        ],
-      }
-    );
+    if (!this.panel) {
+      this.panel = vscode.window.createWebviewPanel(
+        "react-ui",
+        "Extension UI by React",
+        vscode.ViewColumn.One,
+        {
+          enableScripts: true,
+          retainContextWhenHidden: true,
+          localResourceRoots: [
+            vscode.Uri.file(path.join(this.context.extensionPath)),
+          ],
+        }
+      );
 
-    this.panel.onDidDispose((e) => {
-      this.panel = undefined;
-      this.detach();
-    });
-    await this.reload();
+      this.panel.onDidDispose((e) => {
+        this.panel = undefined;
+        this.detach();
+      });
+      await this.reload();
+    }
+    this.panel.reveal();
   }
 
   async reload() {
