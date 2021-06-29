@@ -9,7 +9,8 @@
     "rootDir": "src",
     "strict": true,
     "skipLibCheck": true,
-    "importsNotUsedAsValues": "error"
+    "importsNotUsedAsValues": "error",
+    "preserveWatchOutput": true
   },
   "exclude": ["node_modules", "src/react-ui/src"]
 }

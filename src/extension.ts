@@ -6,7 +6,7 @@ import { Inject } from "./controller/controller-decorator";
 import "./controller";
 import { HubManager } from "./hubs/hub-manager";
 import { Commands } from "./commands";
-import { startSnowpackDev } from "./dev/snowpack-dev";
+import { loadSnowpackConfig } from "./dev/snowpack-dev";
 
 export function activate(context: vscode.ExtensionContext) {
   Inject.context = context;
@@ -53,8 +53,11 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
   if (env.ENV === "dev") {
-    startSnowpackDev(context).then((server) => {
-      webviewManager.devServer = server;
+    loadSnowpackConfig(context).then((config) => {
+      webviewManager.devServerConfig = {
+        port: config.devOptions.port,
+        hmrSocketPort: config.devOptions.hmrPort ?? config.devOptions.port,
+      };
       console.log("Successfully built React UI resources");
       vscode.commands.executeCommand(Commands.WebviewControll.Open).then(() => {
         console.log("Successfully opened webview");

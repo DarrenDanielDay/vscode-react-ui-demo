@@ -9,7 +9,8 @@
   "scripts": {
     "watch:types": "yarn tsc -w --noEmit",
     "start": "snowpack dev",
-    "build": "snowpack build"
+    "build": "snowpack build",
+    "debug": "node ./vscode-debug.mjs --dev"
   },
   "devDependencies": {
     "@types/react": "^17.0.3",

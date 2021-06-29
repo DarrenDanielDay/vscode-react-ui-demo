@@ -3,12 +3,11 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import * as http from "http";
 import env from "@esbuild-env";
-import type { SnowpackDevServer } from "snowpack";
 /**
  * Manage a single webview.
  */
 export class WebviewManager implements vscode.Disposable {
-  devServer?: SnowpackDevServer;
+  devServerConfig?: { port: number; hmrSocketPort?: number };
   panel: vscode.WebviewPanel | undefined;
   public messageHandler?: Parameters<vscode.Webview["onDidReceiveMessage"]>[0];
   constructor(public readonly context: vscode.ExtensionContext) {}
@@ -54,13 +53,13 @@ export class WebviewManager implements vscode.Disposable {
       );
       html = buffer.toString("utf-8");
     } else {
-      if (!this.devServer) {
+      if (!this.devServerConfig) {
         vscode.window.showWarningMessage(
           "Development Server is not ready currently"
         );
         return;
       }
-      const { devServer } = this;
+      const { devServerConfig: devServer } = this;
       const { port } = devServer;
       baseUrl = `http://localhost:${port}`;
       html = await new Promise((resolve, reject) => {
@@ -73,14 +72,12 @@ export class WebviewManager implements vscode.Disposable {
             const resbonseBody = body
               .map((buffer) => buffer.toString("utf-8"))
               .join("");
-            if (devServer.hmrEngine) {
+            if (devServer.hmrSocketPort) {
               // Snowpack's HMR socket is calculated with `location.hostname` by default.
               // This is incorrect in vscode's webview.
               const withHmrSocketUrl = resbonseBody.replace(
                 "<!-- HMR SOCKET URL INJECTION DO NOT MODIFY -->",
-                `<script>window.HMR_WEBSOCKET_URL="ws://localhost:${
-                  devServer.hmrEngine.port ?? port
-                }/"</script>`
+                `<script>window.HMR_WEBSOCKET_URL="ws://localhost:${devServer.hmrSocketPort}/"</script>`
               );
               resolve(withHmrSocketUrl);
             } else {
@@ -134,7 +131,7 @@ export class WebviewManager implements vscode.Disposable {
 
   dispose() {
     this.close();
-    this.devServer = undefined;
+    this.devServerConfig = undefined;
   }
 
   private processUrlOfHtml(html: string, baseUrl: string): string {

@@ -56,6 +56,11 @@ if (isDev) {
   esbuild.build({
     ...extensionCommonBuildOptions,
     sourcemap: "both",
+    watch: {
+      onRebuild() {
+        console.log(`[esbuild] Extension code Rebuild!`);
+      },
+    },
   });
 } else {
   esbuild

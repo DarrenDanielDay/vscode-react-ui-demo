@@ -21,6 +21,7 @@
     "isolatedModules": true,
     "importsNotUsedAsValues": "error",
     "skipLibCheck": true,
+    "preserveWatchOutput": true,
     "lib": ["DOM", "ES2019"]
   },
   "include": ["src"]

@@ -4,13 +4,18 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Install",
+      "type": "shell",
+      "command": "yarn"
+    },
+    {
+      "label": "Snowpack Dev",
       "type": "npm",
-      "script": "watch:esbuild",
-      "problemMatcher": "$tsc-watch",
+      "script": "debug",
+      "path": "src/react-ui/package.json",
       "isBackground": true,
-      "presentation": {
-        "reveal": "never"
-      },
+      "problemMatcher": "$tsc-watch",
+      "dependsOn": ["Install"],
       "group": {
         "kind": "build",
         "isDefault": true
