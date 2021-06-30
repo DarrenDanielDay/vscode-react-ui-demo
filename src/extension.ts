@@ -58,7 +58,6 @@ export function activate(context: vscode.ExtensionContext) {
         port: config.devOptions.port,
         hmrSocketPort: config.devOptions.hmrPort ?? config.devOptions.port,
       };
-      console.log("Successfully built React UI resources");
       vscode.commands.executeCommand(Commands.WebviewControll.Open).then(() => {
         console.log("Successfully opened webview");
       });

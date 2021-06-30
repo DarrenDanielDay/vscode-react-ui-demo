@@ -1,10 +1,7 @@
 // @ts-check
 /// <reference path="esbuild-env.d.ts" />
 import esbuild from "esbuild";
-import { minify } from "terser";
 import path from "path";
-import util from "util";
-import fs from "fs";
 //#region Environment variables
 /** @type {import('@esbuild-env').ESBuildEnv} */
 const devEnv = {
@@ -51,14 +48,45 @@ const extensionCommonBuildOptions = {
   bundle: true,
 };
 //#endregion
-
+/**
+ * Trace build message.
+ * @param message {Pick<import("esbuild").BuildFailure, "errors" | "warnings">}
+ * @param method {(...args: any[]) => void}
+ */
+function trackMessage(message, method) {
+  const date = new Date();
+  const timeData = [date.getHours(), date.getMinutes(), date.getSeconds()];
+  const prefix = `[${timeData
+    .map((time) => (time + "").padEnd(2, "0"))
+    .join(":")}] [esbuild]`;
+  method(`${prefix} Extension code rebuild!`);
+  for (const warning of message.warnings) {
+    const {
+      location: { file, line, column, suggestion },
+      text,
+    } = warning;
+    method(`${prefix} ${file}(${line}:${column})`);
+    text && method(`${prefix} ${text}`);
+    suggestion && method(`${prefix} ${suggestion}`);
+  }
+  for (const warning of message.errors) {
+    const {
+      location: { file, line, column, suggestion },
+      text,
+    } = warning;
+    method(`${prefix} ${file}(${line}:${column})`);
+    text && method(`${prefix} ${text}`);
+    suggestion && method(`${prefix} ${suggestion}`);
+  }
+}
 if (isDev) {
   esbuild.build({
     ...extensionCommonBuildOptions,
     sourcemap: "both",
     watch: {
-      onRebuild() {
-        console.log(`[esbuild] Extension code Rebuild!`);
+      onRebuild(error, result) {
+        if (error) trackMessage(error, console.error);
+        else trackMessage(result, console.log);
       },
     },
   });
@@ -68,18 +96,6 @@ if (isDev) {
       ...extensionCommonBuildOptions,
       minify: true,
       treeShaking: true,
-    })
-    .then(async () => {
-      const read = util.promisify(fs.readFile);
-      const write = util.promisify(fs.writeFile);
-      const bundle = path.resolve(
-        extensionCommonBuildOptions.outdir ?? "",
-        "extension.js"
-      );
-      const content = (await read(bundle)).toString("utf-8");
-      const minified = await minify(content, { ecma: 2015 });
-      await write(bundle, minified.code ?? "");
-      console.log("terser minify finished");
     })
     .catch(console.error);
 }

@@ -4,22 +4,38 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Install",
-      "type": "shell",
-      "command": "yarn"
-    },
-    {
       "label": "Snowpack Dev",
       "type": "npm",
       "script": "debug",
+      "options": {
+        "env": { "TSC_WATCH": "Both" }
+      },
       "path": "src/react-ui/package.json",
       "isBackground": true,
       "problemMatcher": "$tsc-watch",
-      "dependsOn": ["Install"],
+      "dependsOn": [
+        "Install Extension Dependencies",
+        "Install UI Dependencies"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "Install Extension Dependencies",
+      "type": "shell",
+      "command": "yarn",
+      "group": "none"
+    },
+    {
+      "label": "Install UI Dependencies",
+      "type": "shell",
+      "command": "yarn",
+      "options": {
+        "cwd": "src/react-ui"
+      },
+      "group": "none"
     }
   ]
 }

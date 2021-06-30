@@ -67,14 +67,16 @@
     }
   },
   "scripts": {
-    "prepare": "husky install && cd src/react-ui && yarn",
+    "prepare": "husky install",
     "vscode:prepublish": "yarn build",
     "watch:types": "tsc -watch --noEmit -p ./",
     "watch:esbuild": "node ./esbuild-for-extension.mjs --dev",
     "format": "prettier --write .",
     "lint:fix": "pretty-quick --staged",
     "lint:types": "tsc --noEmit -p ./ && cd ./src/react-ui && tsc --noEmit -p ./",
-    "build": "node ./esbuild-for-extension.mjs && cd ./src/react-ui && yarn build",
+    "build": "yarn build:extension && yarn build:ui",
+    "build:extension": "node ./esbuild-for-extension.mjs",
+    "build:ui": "cd src/react-ui && yarn build",
     "bundle": "yarn vsce package"
   },
   "devDependencies": {
@@ -87,7 +89,6 @@
     "prettier": "^2.3.0",
     "pretty-quick": "^3.1.0",
     "snowpack": "^3.6.2",
-    "terser": "^5.7.0",
     "typescript": "^4.3.2",
     "vsce": "^1.88.0"
   }
