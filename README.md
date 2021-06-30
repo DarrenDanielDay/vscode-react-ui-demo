@@ -23,19 +23,7 @@ code vscode-react-ui-demo           # This command opens a `vscode` window.
 
 If you want to see the minimum example, you can switch to branch [`minimum-example`](https://github.com/DarrenDanielDay/vscode-react-ui-demo/tree/minimum-example).
 
-In the opened `vscode` window, open the integrated terminal and run the following to build and develop the react UI:
-
-```sh
-# In the integrated terminal of vscode window
-yarn                # Install all dependencies for extension (as well as dependencies of UI sub-project).
-
-# The following is optional for development
-yarn watch:types    # Using `tsc` to check typing and watch file changes.
-cd src/react-ui     # In UI sub-project folder,
-yarn watch:types    # also used `tsc` to check typing and watch file changes.
-```
-
-Then press `F5` in `vscode`, and you will see the demo UI in a new `vscode` window. It may a little bit slow for the first time, but fast from then on.
+In the opened `vscode` window, press `F5`. Just one click for all, and you will see the demo UI in a new `vscode` window. It may a little bit slow for the first time, but fast from then on.
 
 You can edit source code in UI sub-project and see changes!
 
