@@ -1,5 +1,5 @@
 import type { Error, Request, Response } from "../react-ui/communication";
-import { access, toJSON } from "../utils";
+import { access } from "../utils";
 import type * as vscode from "vscode";
 interface ControllerConstructor {
   new (): unknown;
@@ -10,12 +10,6 @@ export class ControllerManager {
   static get instance() {
     this._instance = this._instance ?? new ControllerManager();
     return this._instance;
-  }
-  static toJSONObject<T>(obj: T): T {
-    if (typeof obj === "object") {
-      return JSON.parse(toJSON(obj));
-    }
-    return obj;
   }
 
   readonly controllers = new Set<ControllerConstructor>();
@@ -79,9 +73,9 @@ export class ControllerManager {
   ): Promise<Response<unknown> | Error<unknown>> => {
     const { id, payload } = request;
     try {
-      const result = await this.callController(path, payload.args);
+      const data = await this.callController(path, payload.args);
       return {
-        payload: { path, data: ControllerManager.toJSONObject(result) },
+        payload: { path, data },
         type: "response",
         id,
       };

@@ -13,9 +13,6 @@ type AccessPaths<T> = T extends object
       [K in keyof T]: [K] | [K, ...AccessPaths<T[K]>];
     }[keyof T]
   : [];
-export function toJSON(obj: unknown): string {
-  return JSON.stringify(obj);
-}
 
 export function access<T, Path extends AccessPaths<T>>(
   source: T,
