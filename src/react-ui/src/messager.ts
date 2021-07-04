@@ -1,7 +1,7 @@
 import type { PropertyKeys } from "../../utils/types/property-key";
 import type { AnyMessage, Event, Request, Response } from "../communication";
 import type { CoreHubEvents } from "../message-protocol";
-
+import { json } from "./json-serializer";
 if (typeof acquireVsCodeApi !== "function") {
   alert(
     "You need to run this app in vscode's webview. Some APIs are not available in browsers."
@@ -78,7 +78,7 @@ export class MessageManager {
         id,
         type: "request",
       };
-      window.vscodeAPI.postMessage(request);
+      window.vscodeAPI.postMessage(json.serialize(request));
     });
   }
 
@@ -92,7 +92,8 @@ export class MessageManager {
       payload,
       type: "event",
     };
-    window.vscodeAPI.postMessage(event);
+
+    window.vscodeAPI.postMessage(json.serialize(event));
   }
 
   onEvent<K extends PropertyKeys<CoreHubEvents>>(
@@ -121,7 +122,7 @@ export class MessageManager {
   }
 
   listener = (event: { data: AnyMessage }) => {
-    const message = event.data;
+    const message = json.parse(event.data) as AnyMessage;
     if (message.type === "response") {
       this.accept(message.id, message.payload.data);
     } else if (message.type === "error") {

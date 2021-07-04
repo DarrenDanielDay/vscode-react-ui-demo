@@ -1,5 +1,10 @@
 import type { PropertyKeys } from "../utils/types/property-key";
 
+export interface DataTransferMiddleware {
+  serialize(value: unknown): unknown;
+  parse(value: unknown): unknown;
+}
+
 export type MessageType = "request" | "response" | "event" | "error";
 
 export interface Message<T> {

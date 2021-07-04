@@ -3,6 +3,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import * as http from "http";
 import env from "@esbuild-env";
+import { json } from "./react-ui/src/json-serializer";
 /**
  * Manage a single webview.
  */
@@ -114,8 +115,8 @@ export class WebviewManager implements vscode.Disposable {
       if (!this.panel) {
         return;
       }
-      const result = await messageHandler(e);
-      !!result && this.panel.webview.postMessage(result);
+      const result = await messageHandler(json.parse(e));
+      !!result && this.panel.webview.postMessage(json.serialize(result));
     };
     this.attachResource = this.panel.webview.onDidReceiveMessage(
       this.messageHandler

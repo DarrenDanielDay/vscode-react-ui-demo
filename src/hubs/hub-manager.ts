@@ -1,6 +1,7 @@
 import type * as vscode from "vscode";
 import type { Event, Hub } from "../react-ui/communication";
 import type { CoreHubEvents } from "../react-ui/message-protocol";
+import { json } from "../react-ui/src/json-serializer";
 import type { PropertyKeys } from "../utils/types/property-key";
 
 export class HubDispatcher<T> implements Hub<T>, vscode.Disposable {
@@ -64,7 +65,7 @@ export class HubManager implements vscode.Disposable {
           payload,
           type: "event",
         };
-        webview.postMessage(event);
+        webview.postMessage(json.serialize(event));
       });
     });
   }
