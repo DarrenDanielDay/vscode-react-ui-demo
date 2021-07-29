@@ -67,7 +67,7 @@
     }
   },
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "yarn husky install",
     "vscode:prepublish": "yarn build",
     "watch:types": "tsc -watch --noEmit -p ./",
     "watch:esbuild": "node ./esbuild-for-extension.mjs --dev",

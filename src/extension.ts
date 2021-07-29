@@ -20,17 +20,19 @@ export function activate(context: vscode.ExtensionContext) {
       webviewManager.attach(MessageManager.instance.messageHandler);
     HubManager.instance.attach(webviewManager.panel!.webview);
   };
-  const interval = setInterval(() => {
-    HubManager.instance.dipatcher.emit(
-      "chat",
-      "Dispatched by interval in extension"
-    );
-  }, 10000);
-  context.subscriptions.push({
-    dispose() {
-      clearInterval(interval);
-    },
-  });
+  if (env.ENV === "dev") {
+    const interval = setInterval(() => {
+      HubManager.instance.dipatcher.emit(
+        "chat",
+        "Dispatched by interval in extension"
+      );
+    }, 10000);
+    context.subscriptions.push({
+      dispose() {
+        clearInterval(interval);
+      },
+    });
+  }
   HubManager.instance.dipatcher.on("chat", (message) => {
     console.log("Extension received chat event message:", message);
   });
