@@ -6,7 +6,7 @@ import path from "path";
 /** @type {import('@esbuild-env').ESBuildEnv} */
 const devEnv = {
   ENV: "dev",
-  STATIC_FILE_BASE_DIR_NAMES: ["src", "react-ui", "src"],
+  STATIC_FILE_BASE_DIR_NAMES: ["src", "app", "src"],
   EXTENSION_BASE_NAME: "vscode-react-ui-demo",
 };
 /** @type {import("@esbuild-env").ESBuildEnv} */

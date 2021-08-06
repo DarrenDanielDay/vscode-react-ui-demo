@@ -1,7 +1,7 @@
 import type * as vscode from "vscode";
-import type { Event, EventHub } from "../react-ui/communication";
-import type { CoreEvents } from "../react-ui/message-protocol";
-import { json } from "../react-ui/src/json-serializer";
+import type { Event, EventHub } from "../app/communication";
+import type { CoreEvents } from "../app/message-protocol";
+import { json } from "../app/src/json-serializer";
 import type { PropertyKeys } from "../utils/types/property-key";
 
 interface IEventDispatcher<T> extends EventHub<T>, vscode.Disposable {

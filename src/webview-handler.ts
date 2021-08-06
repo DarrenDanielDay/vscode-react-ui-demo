@@ -3,7 +3,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import * as http from "http";
 import env from "@esbuild-env";
-import { json } from "./react-ui/src/json-serializer";
+import { json } from "./app/src/json-serializer";
 type OnDidReceiveMessageHandler = Parameters<
   vscode.Webview["onDidReceiveMessage"]
 >[0];

@@ -1,4 +1,4 @@
-import type { Error, Request, Response } from "../react-ui/communication";
+import type { Error, Request, Response } from "../app/communication";
 import { access } from "../utils";
 import type * as vscode from "vscode";
 import { createCoreAPI } from "./core-module";

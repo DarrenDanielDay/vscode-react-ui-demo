@@ -78,7 +78,7 @@ export const App: React.FC = () => {
             <img src={github} className={styles.github} alt="github" />
           </a>
           <p>
-            Edit <code>src/react-ui/src/app.tsx</code> and save to reload.
+            Edit <code>src/app/src/app.tsx</code> and save to reload.
           </p>
           <a
             className={styles["App-link"]}

@@ -73,10 +73,10 @@
     "watch:esbuild": "node ./esbuild-for-extension.mjs --dev",
     "format": "prettier --write .",
     "lint:fix": "pretty-quick --staged",
-    "lint:types": "tsc --noEmit -p ./ && cd ./src/react-ui && tsc --noEmit -p ./",
+    "lint:types": "tsc --noEmit -p ./ && cd ./src/app && tsc --noEmit -p ./",
     "build": "yarn build:extension && yarn build:ui",
     "build:extension": "node ./esbuild-for-extension.mjs",
-    "build:ui": "cd src/react-ui && yarn build",
+    "build:ui": "cd src/app && yarn build",
     "bundle": "yarn vsce package"
   },
   "devDependencies": {

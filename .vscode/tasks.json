@@ -10,7 +10,7 @@
       "options": {
         "env": { "TSC_WATCH": "Both" }
       },
-      "path": "src/react-ui/package.json",
+      "path": "src/app/package.json",
       "isBackground": true,
       "problemMatcher": "$tsc-watch",
       "dependsOn": [
@@ -33,7 +33,7 @@
       "type": "shell",
       "command": "yarn",
       "options": {
-        "cwd": "src/react-ui"
+        "cwd": "src/app"
       },
       "group": "none"
     }

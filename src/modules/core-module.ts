@@ -1,6 +1,6 @@
 import env from "@esbuild-env";
 import * as vscode from "vscode";
-import type { CoreAPI } from "../react-ui/message-protocol";
+import type { CoreAPI } from "../app/message-protocol";
 
 interface CoreAPIMixin {
   readonly stateMap: Map<string, unknown>;

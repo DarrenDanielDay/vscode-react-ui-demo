@@ -12,5 +12,5 @@
     "importsNotUsedAsValues": "error",
     "preserveWatchOutput": true
   },
-  "exclude": ["node_modules", "src/react-ui/src"]
+  "exclude": ["node_modules", "src/app/src"]
 }

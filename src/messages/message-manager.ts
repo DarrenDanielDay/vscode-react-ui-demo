@@ -1,6 +1,6 @@
 import { globalModuleManager } from "../modules/module-manager";
 import { globalEventHubAdapter } from "../events/event-manager";
-import type { Event, Message, Request } from "../react-ui/communication";
+import type { Event, Message, Request } from "../app/communication";
 
 function isMessage(obj: any): obj is Message<any> {
   return (
