@@ -28,6 +28,8 @@ export interface IWebviewManager extends vscode.Disposable {
 }
 
 export function createWebviewManager(
+  viewType: string,
+  title: string,
   context: vscode.ExtensionContext
 ): IWebviewManager {
   let attachResource: vscode.Disposable | undefined = undefined;
@@ -66,8 +68,8 @@ export function createWebviewManager(
   async function open() {
     if (!panel) {
       panel = vscode.window.createWebviewPanel(
-        "react-ui",
-        "Extension UI by React",
+        viewType,
+        title,
         vscode.ViewColumn.One,
         {
           enableScripts: true,
@@ -151,9 +153,7 @@ export function createWebviewManager(
     panel.dispose();
     panel = undefined;
   }
-  function attach(
-    handler: Parameters<vscode.Webview["onDidReceiveMessage"]>[0]
-  ) {
+  function attach(handler: OnDidReceiveMessageHandler) {
     if (messageHandler) {
       throw new Error("Cannot attach handler more than once!");
     }

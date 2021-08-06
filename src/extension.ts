@@ -10,7 +10,11 @@ import { globalMessageHandler } from "./messages/message-manager";
 
 export function activate(context: vscode.ExtensionContext) {
   globalModuleManager.useImpl(createCoreAPI());
-  const webviewManager = createWebviewManager(context);
+  const webviewManager = createWebviewManager(
+    "ui",
+    "Extension UI of React",
+    context
+  );
   context.subscriptions.push(webviewManager);
   context.subscriptions.push(globalEventHubAdapter);
   const { open: doOpen, reload, close } = webviewManager;
