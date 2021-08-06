@@ -4,7 +4,7 @@ import { createWebviewManager, IWebviewManager } from "./webview-handler";
 import { globalModuleManager } from "./modules/module-manager";
 import { globalEventHubAdapter } from "./events/event-manager";
 import { Commands } from "./commands";
-import { loadSnowpackConfig } from "./dev/snowpack-dev";
+import { loadSnowpackConfig } from "./debug/snowpack-dev";
 import { createCoreAPI } from "./modules/core-module";
 import { globalMessageHandler } from "./messages/message-manager";
 
