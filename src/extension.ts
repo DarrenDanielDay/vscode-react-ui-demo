@@ -2,27 +2,27 @@ import * as vscode from "vscode";
 import env from "@esbuild-env";
 import { createWebviewManager, IWebviewManager } from "./webview-handler";
 import { globalModuleManager } from "./modules/module-manager";
-import { globalHubManager } from "./hubs/hub-manager";
+import { globalEventHubAdapter } from "./events/event-manager";
 import { Commands } from "./commands";
 import { loadSnowpackConfig } from "./dev/snowpack-dev";
 import { createCoreAPI } from "./modules/core-module";
-import { globalMessageHandler } from "./message/message-manager";
+import { globalMessageHandler } from "./messages/message-manager";
 
 export function activate(context: vscode.ExtensionContext) {
   globalModuleManager.useImpl(createCoreAPI());
   const webviewManager = createWebviewManager(context);
   context.subscriptions.push(webviewManager);
-  context.subscriptions.push(globalHubManager);
+  context.subscriptions.push(globalEventHubAdapter);
   const { open: doOpen, reload, close } = webviewManager;
   const open = function (this: IWebviewManager) {
     doOpen.call(this);
     webviewManager.messageHandler ||
       webviewManager.attach(globalMessageHandler);
-    globalHubManager.attach(webviewManager.panel!.webview);
+    globalEventHubAdapter.attach(webviewManager.panel!.webview);
   };
   if (env.ENV === "dev") {
     const interval = setInterval(() => {
-      globalHubManager.dispatcher.emit(
+      globalEventHubAdapter.dispatcher.emit(
         "chat",
         "Dispatched by interval in extension"
       );
@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
       },
     });
   }
-  globalHubManager.dispatcher.on("chat", (message) => {
+  globalEventHubAdapter.dispatcher.on("chat", (message) => {
     console.log("Extension received chat event message:", message);
   });
   context.subscriptions.push(

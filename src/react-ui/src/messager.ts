@@ -1,6 +1,6 @@
 import type { PropertyKeys } from "../../utils/types/property-key";
 import type { AnyMessage, Event, Request, Response } from "../communication";
-import type { CoreHubEvents } from "../message-protocol";
+import type { CoreEvents } from "../message-protocol";
 import { json } from "./json-serializer";
 if (typeof acquireVsCodeApi !== "function") {
   alert(
@@ -32,8 +32,8 @@ export interface PromiseHandler<T> {
 
 export interface IMessageManager {
   handlerMap: Map<
-    PropertyKeys<CoreHubEvents>,
-    Set<(value: CoreHubEvents[PropertyKeys<CoreHubEvents>]) => void>
+    PropertyKeys<CoreEvents>,
+    Set<(value: CoreEvents[PropertyKeys<CoreEvents>]) => void>
   >;
   messageQueue: Map<number, PromiseHandler<any>>;
   readonly seq: number;
@@ -41,17 +41,17 @@ export interface IMessageManager {
   accept(seq: number, payload: unknown): void;
   abort(seq: number, error?: unknown): void;
   request(path: string[], payload: unknown[]): Promise<Response<unknown>>;
-  dispatchToExtension<K extends PropertyKeys<CoreHubEvents>>(
+  dispatchToExtension<K extends PropertyKeys<CoreEvents>>(
     name: K,
-    payload: CoreHubEvents[K]
+    payload: CoreEvents[K]
   ): void;
-  onEvent<K extends PropertyKeys<CoreHubEvents>>(
+  onEvent<K extends PropertyKeys<CoreEvents>>(
     name: K,
-    handler: (value: CoreHubEvents[K]) => void
+    handler: (value: CoreEvents[K]) => void
   ): void;
-  offEvent<K extends PropertyKeys<CoreHubEvents>>(
+  offEvent<K extends PropertyKeys<CoreEvents>>(
     name: K,
-    handler: (value: CoreHubEvents[K]) => void
+    handler: (value: CoreEvents[K]) => void
   ): void;
   listener: (event: { data: AnyMessage }) => void;
 }
@@ -60,8 +60,8 @@ export function createMessageManager(): IMessageManager {
   let _seq = 0;
   const messageQueue = new Map<number, PromiseHandler<any>>();
   const handlerMap = new Map<
-    PropertyKeys<CoreHubEvents>,
-    Set<(value: CoreHubEvents[PropertyKeys<CoreHubEvents>]) => void>
+    PropertyKeys<CoreEvents>,
+    Set<(value: CoreEvents[PropertyKeys<CoreEvents>]) => void>
   >();
   function getNextSeq() {
     return _seq++;
@@ -80,9 +80,9 @@ export function createMessageManager(): IMessageManager {
       dispatchEvent(message.name, message.payload);
     }
   };
-  function dispatchEvent<K extends PropertyKeys<CoreHubEvents>>(
+  function dispatchEvent<K extends PropertyKeys<CoreEvents>>(
     name: K,
-    payload: CoreHubEvents[K]
+    payload: CoreEvents[K]
   ): void {
     instance.handlerMap.get(name)?.forEach((handler) => {
       handler.call(undefined, payload);
@@ -121,11 +121,11 @@ export function createMessageManager(): IMessageManager {
     });
   }
 
-  function dispatchToExtension<K extends PropertyKeys<CoreHubEvents>>(
+  function dispatchToExtension<K extends PropertyKeys<CoreEvents>>(
     name: K,
-    payload: CoreHubEvents[K]
+    payload: CoreEvents[K]
   ): void {
-    const event: Event<CoreHubEvents[K]> = {
+    const event: Event<CoreEvents[K]> = {
       id: 0,
       name,
       payload,
@@ -135,17 +135,17 @@ export function createMessageManager(): IMessageManager {
     window.vscodeAPI.postMessage(json.serialize(event));
   }
 
-  function onEvent<K extends PropertyKeys<CoreHubEvents>>(
+  function onEvent<K extends PropertyKeys<CoreEvents>>(
     name: K,
-    handler: (value: CoreHubEvents[K]) => void
+    handler: (value: CoreEvents[K]) => void
   ) {
     handlerMap.has(name) || handlerMap.set(name, new Set());
     handlerMap.get(name)!.add(handler);
   }
 
-  function offEvent<K extends PropertyKeys<CoreHubEvents>>(
+  function offEvent<K extends PropertyKeys<CoreEvents>>(
     name: K,
-    handler: (value: CoreHubEvents[K]) => void
+    handler: (value: CoreEvents[K]) => void
   ) {
     handlerMap.has(name) || handlerMap.set(name, new Set());
     handlerMap.get(name)!.delete(handler);

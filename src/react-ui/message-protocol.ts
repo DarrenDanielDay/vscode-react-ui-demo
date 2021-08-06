@@ -7,6 +7,6 @@ export interface CoreAPI {
   vscode: typeof import("vscode");
 }
 
-export interface CoreHubEvents {
+export interface CoreEvents {
   chat: string;
 }

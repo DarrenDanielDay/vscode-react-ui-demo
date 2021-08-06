@@ -1,5 +1,5 @@
 import { globalModuleManager } from "../modules/module-manager";
-import { globalHubManager } from "../hubs/hub-manager";
+import { globalEventHubAdapter } from "../events/event-manager";
 import type { Event, Message, Request } from "../react-ui/communication";
 
 function isMessage(obj: any): obj is Message<any> {
@@ -24,6 +24,6 @@ export const globalMessageHandler = (e: any) => {
     return globalModuleManager.requestHandler(e.payload.path, e);
   }
   if (isEvent(e)) {
-    return globalHubManager.eventHandler(e);
+    return globalEventHubAdapter.eventHandler(e);
   }
 };

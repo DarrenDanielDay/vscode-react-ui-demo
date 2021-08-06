@@ -1,10 +1,10 @@
 import type * as vscode from "vscode";
-import type { Event, Hub } from "../react-ui/communication";
-import type { CoreHubEvents } from "../react-ui/message-protocol";
+import type { Event, EventHub } from "../react-ui/communication";
+import type { CoreEvents } from "../react-ui/message-protocol";
 import { json } from "../react-ui/src/json-serializer";
 import type { PropertyKeys } from "../utils/types/property-key";
 
-interface IHubDispatcher<T> extends Hub<T>, vscode.Disposable {
+interface IEventDispatcher<T> extends EventHub<T>, vscode.Disposable {
   onEach(
     handler: (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
   ): void;
@@ -13,7 +13,7 @@ interface IHubDispatcher<T> extends Hub<T>, vscode.Disposable {
   ): void;
 }
 
-export function createHubDispatcher<T>(): IHubDispatcher<T> {
+export function createDispatcher<T>(): IEventDispatcher<T> {
   const handlersMap = new Map<
     PropertyKeys<T>,
     Set<(value: T[PropertyKeys<T>]) => void>
@@ -67,17 +67,17 @@ export function createHubDispatcher<T>(): IHubDispatcher<T> {
   };
 }
 
-export interface IHubManager extends vscode.Disposable {
+export interface IEventHubAdapter extends vscode.Disposable {
   webviews: Set<vscode.Webview>;
-  dispatcher: IHubDispatcher<CoreHubEvents>;
+  dispatcher: IEventDispatcher<CoreEvents>;
   eventHandler: (event: Event<any>) => void;
   attach(webview: vscode.Webview): void;
   detach(webview: vscode.Webview): void;
 }
 
-export function createHubManager(): IHubManager {
+export function createEventHubAdapter(): IEventHubAdapter {
   const webviews = new Set<vscode.Webview>();
-  const dispatcher = createHubDispatcher<CoreHubEvents>();
+  const dispatcher = createDispatcher<CoreEvents>();
   const eventHandler = (event: Event<any>) => {
     // @ts-expect-error Cannot expect the name to be statically checked
     dispatcher.emit(event.name, event.payload);
@@ -109,4 +109,4 @@ export function createHubManager(): IHubManager {
   };
 }
 
-export const globalHubManager = createHubManager();
+export const globalEventHubAdapter = createEventHubAdapter();

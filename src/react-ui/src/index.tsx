@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import React from "react";
 import { App } from "./app";
-import type { Hub } from "../communication";
+import type { EventHub } from "../communication";
 import { globalMessageManager } from "./messager";
 
 window.addEventListener("message", globalMessageManager.listener);
@@ -40,10 +40,10 @@ window.SessionInvoker = new Proxy(
 window.SessionHubs = new Proxy(
   {},
   {
-    get(_target, key: keyof Hub<any>) {
+    get(_target, key: keyof EventHub<any>) {
       return createTrackerProxy([key], (path, argArray) => {
         // @ts-expect-error
-        const method: keyof Hub<any> = path[path.length - 1];
+        const method: keyof EventHub<any> = path[path.length - 1];
         if (method === "on") {
           // @ts-expect-error Skip real arguments check
           globalMessageManager.onEvent(...argArray);
