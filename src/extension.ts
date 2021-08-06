@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
 import env from "@esbuild-env";
 import { createWebviewManager, IWebviewManager } from "./webview-handler";
-import { globalControllerManager } from "./controller/controller-decorator";
+import { globalModuleManager } from "./modules/module-manager";
 import { globalHubManager } from "./hubs/hub-manager";
 import { Commands } from "./commands";
 import { loadSnowpackConfig } from "./dev/snowpack-dev";
-import { createCoreAPI } from "./controller/core-controller";
+import { createCoreAPI } from "./modules/core-module";
 import { globalMessageHandler } from "./message/message-manager";
 
 export function activate(context: vscode.ExtensionContext) {
-  globalControllerManager.useImpl(createCoreAPI());
+  globalModuleManager.useImpl(createCoreAPI());
   const webviewManager = createWebviewManager(context);
   context.subscriptions.push(webviewManager);
   context.subscriptions.push(globalHubManager);

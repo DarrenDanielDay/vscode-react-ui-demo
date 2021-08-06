@@ -1,19 +1,19 @@
 import type { Error, Request, Response } from "../react-ui/communication";
 import { access } from "../utils";
 import type * as vscode from "vscode";
-import { createCoreAPI } from "./core-controller";
+import { createCoreAPI } from "./core-module";
 
-interface IControllerManager<T> {
+interface IModuleManager<T> {
   readonly api: T;
   useImpl(api: T): void;
-  callController(path: string[], params: readonly unknown[]): Promise<unknown>;
+  callModuleAPI(path: string[], params: readonly unknown[]): Promise<unknown>;
   requestHandler: (
     path: string[],
     request: Request<unknown[]>
   ) => Promise<Response<unknown> | Error<unknown>>;
 }
 
-export function createControllerManager<T>(api: T): IControllerManager<T> {
+export function createModuleManager<T>(api: T): IModuleManager<T> {
   function useImpl(newApi: T) {
     api = newApi;
   }
@@ -23,7 +23,7 @@ export function createControllerManager<T>(api: T): IControllerManager<T> {
   ): Promise<Response<unknown> | Error<unknown>> => {
     const { id, payload } = request;
     try {
-      const data = await callController(path, payload.args);
+      const data = await callModuleAPI(path, payload.args);
       return {
         payload: { path, data },
         type: "response",
@@ -40,7 +40,7 @@ export function createControllerManager<T>(api: T): IControllerManager<T> {
       };
     }
   };
-  async function callController(
+  async function callModuleAPI(
     path: string[],
     params: readonly unknown[]
   ): Promise<unknown> {
@@ -54,19 +54,19 @@ export function createControllerManager<T>(api: T): IControllerManager<T> {
       );
     } else {
       throw new Error(
-        `Cannot call controller method with path '${path.join(".")}'.`
+        `Cannot call module method with path '${path.join(".")}'.`
       );
     }
   }
-  const instance: IControllerManager<T> = {
+  const instance: IModuleManager<T> = {
     get api() {
       return api;
     },
     useImpl,
-    callController,
+    callModuleAPI: callModuleAPI,
     requestHandler,
   };
   return instance;
 }
 
-export const globalControllerManager = createControllerManager(createCoreAPI());
+export const globalModuleManager = createModuleManager(createCoreAPI());

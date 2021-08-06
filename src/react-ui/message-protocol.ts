@@ -1,4 +1,4 @@
-// Define your protocol here, and implement them in `controllers` with best practice!
+// Define your protocol here, and implement them in `modules` with best practice!
 
 export interface CoreAPI {
   logInput(input: string): string;

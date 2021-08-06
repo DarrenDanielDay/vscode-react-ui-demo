@@ -1,4 +1,4 @@
-import { globalControllerManager } from "../controller/controller-decorator";
+import { globalModuleManager } from "../modules/module-manager";
 import { globalHubManager } from "../hubs/hub-manager";
 import type { Event, Message, Request } from "../react-ui/communication";
 
@@ -21,7 +21,7 @@ function isEvent(obj: any): obj is Event<any> {
 
 export const globalMessageHandler = (e: any) => {
   if (isRequest(e)) {
-    return globalControllerManager.requestHandler(e.payload.path, e);
+    return globalModuleManager.requestHandler(e.payload.path, e);
   }
   if (isEvent(e)) {
     return globalHubManager.eventHandler(e);
