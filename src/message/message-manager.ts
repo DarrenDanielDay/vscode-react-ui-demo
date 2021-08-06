@@ -19,13 +19,11 @@ function isEvent(obj: any): obj is Event<any> {
   return isMessage(obj) && obj.type === "event";
 }
 
-export function globalMessageHandler(e: unknown) {
-  return (e: any) => {
-    if (isRequest(e)) {
-      return globalControllerManager.requestHandler(e.payload.path, e);
-    }
-    if (isEvent(e)) {
-      return globalHubManager.eventHandler(e);
-    }
-  };
-}
+export const globalMessageHandler = (e: any) => {
+  if (isRequest(e)) {
+    return globalControllerManager.requestHandler(e.payload.path, e);
+  }
+  if (isEvent(e)) {
+    return globalHubManager.eventHandler(e);
+  }
+};

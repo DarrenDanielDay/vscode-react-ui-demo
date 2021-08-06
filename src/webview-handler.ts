@@ -154,7 +154,7 @@ export function createWebviewManager(
   function attach(
     handler: Parameters<vscode.Webview["onDidReceiveMessage"]>[0]
   ) {
-    if (!messageHandler) {
+    if (messageHandler) {
       throw new Error("Cannot attach handler more than once!");
     }
     if (!panel) {
@@ -184,6 +184,12 @@ export function createWebviewManager(
     },
     set devServerConfig(value) {
       devServerConfig = value;
+    },
+    get messageHandler() {
+      return messageHandler;
+    },
+    get panel() {
+      return panel;
     },
     dispose() {
       close();

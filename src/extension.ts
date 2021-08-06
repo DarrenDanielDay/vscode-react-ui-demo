@@ -1,10 +1,7 @@
 import * as vscode from "vscode";
 import env from "@esbuild-env";
 import { createWebviewManager, IWebviewManager } from "./webview-handler";
-import {
-  globalControllerManager,
-  Inject,
-} from "./controller/controller-decorator";
+import { globalControllerManager } from "./controller/controller-decorator";
 import { globalHubManager } from "./hubs/hub-manager";
 import { Commands } from "./commands";
 import { loadSnowpackConfig } from "./dev/snowpack-dev";
@@ -12,8 +9,7 @@ import { createCoreAPI } from "./controller/core-controller";
 import { globalMessageHandler } from "./message/message-manager";
 
 export function activate(context: vscode.ExtensionContext) {
-  Inject.context = context;
-  globalControllerManager.registerController(createCoreAPI);
+  globalControllerManager.useImpl(createCoreAPI());
   const webviewManager = createWebviewManager(context);
   context.subscriptions.push(webviewManager);
   context.subscriptions.push(globalHubManager);
@@ -72,5 +68,5 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-  Inject.context = undefined;
+  // Do nothing
 }
