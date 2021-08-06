@@ -5,21 +5,47 @@ interface ControllerConstructor {
   new (): unknown;
 }
 
-export class ControllerManager {
-  private static _instance: ControllerManager | undefined;
-  static get instance() {
-    this._instance = this._instance ?? new ControllerManager();
-    return this._instance;
-  }
+interface IControllerManager {
+  readonly controllers: Set<ControllerConstructor>;
+  registerController(controller: ControllerConstructor): void;
+  callController(path: string[], params: readonly unknown[]): Promise<unknown>;
+  requestHandler: (
+    path: string[],
+    request: Request<unknown[]>
+  ) => Promise<Response<unknown> | Error<unknown>>;
+}
 
-  readonly controllers = new Set<ControllerConstructor>();
-  registerController(controller: ControllerConstructor) {
-    this.controllers.add(controller);
+export function createControllerManager(): IControllerManager {
+  const controllers = new Set<ControllerConstructor>();
+  const requestHandler = async (
+    path: string[],
+    request: Request<unknown[]>
+  ): Promise<Response<unknown> | Error<unknown>> => {
+    const { id, payload } = request;
+    try {
+      const data = await instance.callController(path, payload.args);
+      return {
+        payload: { path, data },
+        type: "response",
+        id,
+      };
+    } catch (error) {
+      return {
+        id,
+        type: "error",
+        payload: {
+          error,
+          message: error?.message,
+        },
+      };
+    }
+  };
+  function registerController(controller: ControllerConstructor) {
+    controllers.add(controller);
   }
-
-  findController(path: string[]): ControllerConstructor {
+  function findController(path: string[]): ControllerConstructor {
     const accessMapping = new Map<ControllerConstructor, any>();
-    this.controllers.forEach((controller) => {
+    controllers.forEach((controller) => {
       accessMapping.set(controller, controller.prototype);
     });
     const pathName = path.join(".");
@@ -41,12 +67,12 @@ export class ControllerManager {
     }
     return [...accessMapping][0]![0];
   }
-  async callController(
+  async function callController(
     path: string[],
     params: readonly unknown[]
   ): Promise<unknown> {
     const pathName = path.join(".");
-    const controller = this.findController(path);
+    const controller = findController(path);
     if (controller) {
       const controllerInstance = new controller();
       const method = access(controllerInstance, path as []);
@@ -66,35 +92,18 @@ export class ControllerManager {
       );
     }
   }
-
-  requestHandler = async (
-    path: string[],
-    request: Request<unknown[]>
-  ): Promise<Response<unknown> | Error<unknown>> => {
-    const { id, payload } = request;
-    try {
-      const data = await this.callController(path, payload.args);
-      return {
-        payload: { path, data },
-        type: "response",
-        id,
-      };
-    } catch (error) {
-      return {
-        id,
-        type: "error",
-        payload: {
-          error,
-          message: error?.message,
-        },
-      };
-    }
+  const instance: IControllerManager = {
+    get controllers() {
+      return controllers;
+    },
+    registerController,
+    callController,
+    requestHandler,
   };
+  return instance;
 }
-// @ts-expect-error
-export const Controller: ClassDecorator = (target: ControllerConstructor) => {
-  ControllerManager.instance.registerController(target);
-};
+
+export const globalControllerManager = createControllerManager();
 
 export const Inject = {
   singleton<T>(creator: () => T, readonly: boolean = true): PropertyDecorator {
@@ -128,11 +137,11 @@ export const Inject = {
   withContext<T>(
     creator: (context: vscode.ExtensionContext) => T
   ): PropertyDecorator {
-    return this.scoped(() => {
-      if (!this.context) {
+    return Inject.scoped(() => {
+      if (!Inject.context) {
         throw new Error("Context not found!");
       }
-      return creator(this.context);
+      return creator(Inject.context);
     });
   },
   context: undefined as undefined | vscode.ExtensionContext,

@@ -4,83 +4,109 @@ import type { CoreHubEvents } from "../react-ui/message-protocol";
 import { json } from "../react-ui/src/json-serializer";
 import type { PropertyKeys } from "../utils/types/property-key";
 
-export class HubDispatcher<T> implements Hub<T>, vscode.Disposable {
-  private handlersMap = new Map<
+interface IHubDispatcher<T> extends Hub<T>, vscode.Disposable {
+  onEach(
+    handler: (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
+  ): void;
+  offEach(
+    handler: (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
+  ): void;
+}
+
+export function createHubDispatcher<T>(): IHubDispatcher<T> {
+  const handlersMap = new Map<
     PropertyKeys<T>,
     Set<(value: T[PropertyKeys<T>]) => void>
   >();
-  dispose() {
-    this.handlersMap.clear();
-    this.handlers.clear();
-  }
-  private handlers = new Set<
+
+  const handlers = new Set<
     (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
   >();
-  onEach(handler: (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void) {
-    this.handlers.add(handler);
-  }
-  offEach(
+  function onEach(
     handler: (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
   ) {
-    this.handlers.delete(handler);
+    handlers.add(handler);
   }
-  on<K extends PropertyKeys<T>>(
+  function offEach(
+    handler: (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
+  ) {
+    handlers.delete(handler);
+  }
+  function on<K extends PropertyKeys<T>>(
     event: K,
     handler: (value: T[K]) => void
   ): void {
-    this.handlersMap.has(event) || this.handlersMap.set(event, new Set());
-    // @ts-expect-error
-    this.handlersMap.get(event)!.add(handler);
+    handlersMap.has(event) || handlersMap.set(event, new Set());
+    // @ts-expect-error Key mapping
+    handlersMap.get(event)!.add(handler);
   }
-  off<K extends PropertyKeys<T>>(
+  function off<K extends PropertyKeys<T>>(
     event: K,
     handler: (value: T[K]) => void
   ): void {
-    this.handlersMap.has(event) || this.handlersMap.set(event, new Set());
-    // @ts-expect-error
-    this.handlersMap.get(event)!.delete(handler);
+    handlersMap.has(event) || handlersMap.set(event, new Set());
+    // @ts-expect-error Key mapping
+    handlersMap.get(event)!.delete(handler);
   }
-  emit<K extends PropertyKeys<T>>(event: K, value: T[K]): void {
-    this.handlers.forEach((handler) => handler.call(undefined, event, value));
-    this.handlersMap
+  function emit<K extends PropertyKeys<T>>(event: K, value: T[K]): void {
+    handlers.forEach((handler) => handler.call(undefined, event, value));
+    handlersMap
       .get(event)
       ?.forEach((handler) => handler.call(undefined, value));
   }
-}
-
-export class HubManager implements vscode.Disposable {
-  private static _instance?: HubManager;
-  static get instance() {
-    this._instance = this._instance ?? new HubManager();
-    return this._instance;
-  }
-  webviews = new Set<vscode.Webview>();
-  dipatcher = new HubDispatcher<CoreHubEvents>();
-  constructor() {
-    this.dipatcher.onEach((name, payload) => {
-      this.webviews.forEach((webview) => {
-        const event: Event<any> = {
-          id: 0,
-          name,
-          payload,
-          type: "event",
-        };
-        webview.postMessage(json.serialize(event));
-      });
-    });
-  }
-  dispose() {
-    this.dipatcher.dispose();
-  }
-  attach(webview: vscode.Webview) {
-    this.webviews.add(webview);
-  }
-  detach(webview: vscode.Webview) {
-    this.webviews.delete(webview);
-  }
-
-  eventHandler = (event: Event<any>) => {
-    // @ts-expect-error
-    this.dipatcher.emit(event.name, event.payload);
+  return {
+    dispose() {
+      handlersMap.clear();
+      handlers.clear();
+    },
+    on,
+    off,
+    emit,
+    onEach,
+    offEach,
   };
 }
+
+export interface IHubManager extends vscode.Disposable {
+  webviews: Set<vscode.Webview>;
+  dispatcher: IHubDispatcher<CoreHubEvents>;
+  eventHandler: (event: Event<any>) => void;
+  attach(webview: vscode.Webview): void;
+  detach(webview: vscode.Webview): void;
+}
+
+export function createHubManager(): IHubManager {
+  const webviews = new Set<vscode.Webview>();
+  const dispatcher = createHubDispatcher<CoreHubEvents>();
+  const eventHandler = (event: Event<any>) => {
+    // @ts-expect-error Cannot expect the name to be statically checked
+    dispatcher.emit(event.name, event.payload);
+  };
+  dispatcher.onEach((name, payload) => {
+    webviews.forEach((webview) => {
+      const event: Event<any> = {
+        id: 0,
+        name,
+        payload,
+        type: "event",
+      };
+      webview.postMessage(json.serialize(event));
+    });
+  });
+  return {
+    webviews,
+    dispatcher,
+    dispose() {
+      dispatcher.dispose();
+    },
+    attach(webview: vscode.Webview) {
+      webviews.add(webview);
+    },
+    detach(webview: vscode.Webview) {
+      webviews.delete(webview);
+    },
+    eventHandler,
+  };
+}
+
+export const globalHubManager = createHubManager();

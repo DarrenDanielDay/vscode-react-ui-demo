@@ -1,10 +1,10 @@
 import ReactDOM from "react-dom";
 import React from "react";
-import { MessageManager } from "./messager";
 import { App } from "./app";
 import type { Hub } from "../communication";
+import { globalMessageManager } from "./messager";
 
-window.addEventListener("message", MessageManager.instance.listener);
+window.addEventListener("message", globalMessageManager.listener);
 const noop = () => {
   // Do nothing
 };
@@ -32,7 +32,7 @@ window.SessionInvoker = new Proxy(
   {
     get(_target, key: string) {
       return createTrackerProxy([key], (path, argArray) => {
-        return MessageManager.instance.request(path, argArray);
+        return globalMessageManager.request(path, argArray);
       });
     },
   }
@@ -45,16 +45,16 @@ window.SessionHubs = new Proxy(
         // @ts-expect-error
         const method: keyof Hub<any> = path[path.length - 1];
         if (method === "on") {
-          // @ts-expect-error
-          MessageManager.instance.onEvent(...argArray);
+          // @ts-expect-error Skip real arguments check
+          globalMessageManager.onEvent(...argArray);
         }
         if (method === "off") {
-          // @ts-expect-error
-          MessageManager.instance.offEvent(...argArray);
+          // @ts-expect-error Skip real arguments check
+          globalMessageManager.offEvent(...argArray);
         }
         if (method === "emit") {
-          // @ts-expect-error
-          MessageManager.instance.dispatchToExtension(...argArray);
+          // @ts-expect-error Skip real arguments check
+          globalMessageManager.dispatchToExtension(...argArray);
         }
       });
     },

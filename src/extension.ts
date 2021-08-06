@@ -1,28 +1,32 @@
 import * as vscode from "vscode";
 import env from "@esbuild-env";
-import { MessageManager } from "./message/message-manager";
-import { WebviewManager } from "./webview-handler";
-import { Inject } from "./controller/controller-decorator";
-import "./controller";
-import { HubManager } from "./hubs/hub-manager";
+import { createWebviewManager, IWebviewManager } from "./webview-handler";
+import {
+  globalControllerManager,
+  Inject,
+} from "./controller/controller-decorator";
+import { globalHubManager } from "./hubs/hub-manager";
 import { Commands } from "./commands";
 import { loadSnowpackConfig } from "./dev/snowpack-dev";
+import { createCoreAPI } from "./controller/core-controller";
+import { globalMessageHandler } from "./message/message-manager";
 
 export function activate(context: vscode.ExtensionContext) {
   Inject.context = context;
-  const webviewManager = new WebviewManager(context);
+  globalControllerManager.registerController(createCoreAPI);
+  const webviewManager = createWebviewManager(context);
   context.subscriptions.push(webviewManager);
-  context.subscriptions.push(HubManager.instance);
+  context.subscriptions.push(globalHubManager);
   const { open: doOpen, reload, close } = webviewManager;
-  const open = function (this: WebviewManager) {
+  const open = function (this: IWebviewManager) {
     doOpen.call(this);
     webviewManager.messageHandler ||
-      webviewManager.attach(MessageManager.instance.messageHandler);
-    HubManager.instance.attach(webviewManager.panel!.webview);
+      webviewManager.attach(globalMessageHandler);
+    globalHubManager.attach(webviewManager.panel!.webview);
   };
   if (env.ENV === "dev") {
     const interval = setInterval(() => {
-      HubManager.instance.dipatcher.emit(
+      globalHubManager.dispatcher.emit(
         "chat",
         "Dispatched by interval in extension"
       );
@@ -33,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
       },
     });
   }
-  HubManager.instance.dipatcher.on("chat", (message) => {
+  globalHubManager.dispatcher.on("chat", (message) => {
     console.log("Extension received chat event message:", message);
   });
   context.subscriptions.push(

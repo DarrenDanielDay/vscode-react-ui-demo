@@ -30,46 +30,85 @@ export interface PromiseHandler<T> {
   reject(error?: any): void;
 }
 
-export class MessageManager {
-  private static _instance: MessageManager | undefined;
-  static get instance() {
-    this._instance = this._instance ?? new MessageManager();
-    return this._instance;
-  }
+export interface IMessageManager {
+  handlerMap: Map<
+    PropertyKeys<CoreHubEvents>,
+    Set<(value: CoreHubEvents[PropertyKeys<CoreHubEvents>]) => void>
+  >;
+  messageQueue: Map<number, PromiseHandler<any>>;
+  readonly seq: number;
+  enqueue(handler: PromiseHandler<any>): number;
+  accept(seq: number, payload: unknown): void;
+  abort(seq: number, error?: unknown): void;
+  request(path: string[], payload: unknown[]): Promise<Response<unknown>>;
+  dispatchToExtension<K extends PropertyKeys<CoreHubEvents>>(
+    name: K,
+    payload: CoreHubEvents[K]
+  ): void;
+  onEvent<K extends PropertyKeys<CoreHubEvents>>(
+    name: K,
+    handler: (value: CoreHubEvents[K]) => void
+  ): void;
+  offEvent<K extends PropertyKeys<CoreHubEvents>>(
+    name: K,
+    handler: (value: CoreHubEvents[K]) => void
+  ): void;
+  listener: (event: { data: AnyMessage }) => void;
+}
 
-  messageQueue = new Map<number, PromiseHandler<any>>();
-  handlerMap = new Map<
+export function createMessageManager(): IMessageManager {
+  let _seq = 0;
+  const messageQueue = new Map<number, PromiseHandler<any>>();
+  const handlerMap = new Map<
     PropertyKeys<CoreHubEvents>,
     Set<(value: CoreHubEvents[PropertyKeys<CoreHubEvents>]) => void>
   >();
-  private _seq = 0;
-  get seq() {
-    return this._seq;
+  function getNextSeq() {
+    return _seq++;
   }
-  getNextSeq() {
-    return this._seq++;
+  const listener = (event: { data: AnyMessage }) => {
+    const message = json.parse(event.data) as AnyMessage;
+    if (message.type === "response") {
+      instance.accept(message.id, message.payload.data);
+    } else if (message.type === "error") {
+      instance.abort(
+        message.id,
+        message.payload.error ?? message.payload.message
+      );
+    } else if (message.type === "event") {
+      // @ts-expect-error Cannot expect the name to be statically checked.
+      dispatchEvent(message.name, message.payload);
+    }
+  };
+  function dispatchEvent<K extends PropertyKeys<CoreHubEvents>>(
+    name: K,
+    payload: CoreHubEvents[K]
+  ): void {
+    instance.handlerMap.get(name)?.forEach((handler) => {
+      handler.call(undefined, payload);
+    });
   }
-  enqueue(handler: PromiseHandler<any>) {
-    const nextSeq = this.getNextSeq();
-    this.messageQueue.set(nextSeq, handler);
+  function enqueue(handler: PromiseHandler<any>) {
+    const nextSeq = getNextSeq();
+    messageQueue.set(nextSeq, handler);
     return nextSeq;
   }
-  accept(seq: number, payload: any) {
-    const { resolve } = this.messageQueue.get(seq) ?? {};
+  function accept(seq: number, payload: any) {
+    const { resolve } = messageQueue.get(seq) ?? {};
     resolve?.(payload);
-    this.messageQueue.delete(seq);
+    messageQueue.delete(seq);
   }
-  abort(seq: number, error?: any) {
-    const { reject } = this.messageQueue.get(seq) ?? {};
+  function abort(seq: number, error?: any) {
+    const { reject } = messageQueue.get(seq) ?? {};
     reject?.(error);
-    this.messageQueue.delete(seq);
+    messageQueue.delete(seq);
   }
-  async request(
+  async function request(
     path: string[],
     payload: unknown[]
   ): Promise<Response<unknown>> {
     return new Promise((resolve, reject) => {
-      const id = this.enqueue({ resolve, reject });
+      const id = enqueue({ resolve, reject });
       const request: Request<unknown[]> = {
         payload: {
           path,
@@ -82,7 +121,7 @@ export class MessageManager {
     });
   }
 
-  dispatchToExtension<K extends PropertyKeys<CoreHubEvents>>(
+  function dispatchToExtension<K extends PropertyKeys<CoreHubEvents>>(
     name: K,
     payload: CoreHubEvents[K]
   ): void {
@@ -96,40 +135,41 @@ export class MessageManager {
     window.vscodeAPI.postMessage(json.serialize(event));
   }
 
-  onEvent<K extends PropertyKeys<CoreHubEvents>>(
+  function onEvent<K extends PropertyKeys<CoreHubEvents>>(
     name: K,
     handler: (value: CoreHubEvents[K]) => void
   ) {
-    this.handlerMap.has(name) || this.handlerMap.set(name, new Set());
-    this.handlerMap.get(name)!.add(handler);
+    handlerMap.has(name) || handlerMap.set(name, new Set());
+    handlerMap.get(name)!.add(handler);
   }
 
-  offEvent<K extends PropertyKeys<CoreHubEvents>>(
+  function offEvent<K extends PropertyKeys<CoreHubEvents>>(
     name: K,
     handler: (value: CoreHubEvents[K]) => void
   ) {
-    this.handlerMap.has(name) || this.handlerMap.set(name, new Set());
-    this.handlerMap.get(name)!.delete(handler);
+    handlerMap.has(name) || handlerMap.set(name, new Set());
+    handlerMap.get(name)!.delete(handler);
   }
-
-  private dispatchEvent<K extends PropertyKeys<CoreHubEvents>>(
-    name: K,
-    payload: CoreHubEvents[K]
-  ): void {
-    this.handlerMap.get(name)?.forEach((handler) => {
-      handler.call(undefined, payload);
-    });
-  }
-
-  listener = (event: { data: AnyMessage }) => {
-    const message = json.parse(event.data) as AnyMessage;
-    if (message.type === "response") {
-      this.accept(message.id, message.payload.data);
-    } else if (message.type === "error") {
-      this.abort(message.id, message.payload.error ?? message.payload.message);
-    } else if (message.type === "event") {
-      // @ts-expect-error
-      this.dispatchEvent(message.name, message.payload);
-    }
+  const instance: IMessageManager = {
+    get handlerMap() {
+      return handlerMap;
+    },
+    get messageQueue() {
+      return messageQueue;
+    },
+    get seq() {
+      return _seq;
+    },
+    enqueue,
+    listener,
+    accept,
+    abort,
+    request,
+    dispatchToExtension,
+    onEvent,
+    offEvent,
   };
+  return instance;
 }
+
+export const globalMessageManager = createMessageManager();

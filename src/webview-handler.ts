@@ -4,17 +4,68 @@ import * as path from "path";
 import * as http from "http";
 import env from "@esbuild-env";
 import { json } from "./react-ui/src/json-serializer";
+type OnDidReceiveMessageHandler = Parameters<
+  vscode.Webview["onDidReceiveMessage"]
+>[0];
+interface DevServerConfig {
+  port: number;
+  hmrSocketPort?: number;
+}
+
 /**
  * Manage a single webview.
  */
-export class WebviewManager implements vscode.Disposable {
-  devServerConfig?: { port: number; hmrSocketPort?: number };
-  panel: vscode.WebviewPanel | undefined;
-  public messageHandler?: Parameters<vscode.Webview["onDidReceiveMessage"]>[0];
-  constructor(public readonly context: vscode.ExtensionContext) {}
-  async open() {
-    if (!this.panel) {
-      this.panel = vscode.window.createWebviewPanel(
+export interface IWebviewManager extends vscode.Disposable {
+  devServerConfig?: DevServerConfig;
+  readonly context: vscode.ExtensionContext;
+  panel?: vscode.WebviewPanel;
+  messageHandler?: OnDidReceiveMessageHandler;
+  open(): Promise<void>;
+  reload(): Promise<void>;
+  close(): void;
+  attach(handler: OnDidReceiveMessageHandler): IWebviewManager;
+  detach(): void;
+}
+
+export function createWebviewManager(
+  context: vscode.ExtensionContext
+): IWebviewManager {
+  let attachResource: vscode.Disposable | undefined = undefined;
+  let panel: vscode.WebviewPanel | undefined = undefined;
+  let messageHandler: OnDidReceiveMessageHandler | undefined = undefined;
+  let devServerConfig: DevServerConfig | undefined = undefined;
+  function processUrlOfHtml(html: string, baseUrl: string): string {
+    return html.replace("%BASE_URL%", baseUrl);
+  }
+  function processHashOfHtml(html: string): string {
+    return html.replace("%HASH%", +new Date() + "");
+  }
+  function staticFileUrlString(
+    panel: vscode.WebviewPanel,
+    ...paths: string[]
+  ): string {
+    return urlOfFile(
+      panel,
+      context,
+      path.join(...env.STATIC_FILE_BASE_DIR_NAMES, ...paths)
+    );
+  }
+  function urlOfFile(
+    panel: vscode.WebviewPanel,
+    context: vscode.ExtensionContext,
+    relativePathToExtensionProject: string
+  ): string {
+    return panel.webview
+      .asWebviewUri(
+        vscode.Uri.file(
+          path.join(context.extensionPath, relativePathToExtensionProject)
+        )
+      )
+      .toString();
+  }
+  async function open() {
+    if (!panel) {
+      panel = vscode.window.createWebviewPanel(
         "react-ui",
         "Extension UI by React",
         vscode.ViewColumn.One,
@@ -22,46 +73,44 @@ export class WebviewManager implements vscode.Disposable {
           enableScripts: true,
           retainContextWhenHidden: true,
           localResourceRoots: [
-            vscode.Uri.file(path.join(this.context.extensionPath)),
+            vscode.Uri.file(path.join(context.extensionPath)),
           ],
         }
       );
 
-      this.panel.onDidDispose((e) => {
-        this.panel = undefined;
-        this.detach();
+      panel.onDidDispose((e) => {
+        panel = undefined;
+        detach();
       });
-      await this.reload();
+      await reload();
     }
-    this.panel.reveal();
+    panel.reveal();
   }
-
-  async reload() {
-    if (!this.panel) {
+  async function reload() {
+    if (!panel) {
       console.warn("Please open panel first!");
       return;
     }
     let html: string;
     let baseUrl: string;
     if (env.ENV === "prod") {
-      baseUrl = this.staticFileUrlString("index.js").replace(/index.js$/, "");
+      baseUrl = staticFileUrlString(panel, "index.js").replace(/index.js$/, "");
       const buffer = await fs.readFile(
         path.join(
-          this.context.extensionPath,
+          context.extensionPath,
           ...env.STATIC_FILE_BASE_DIR_NAMES,
           "index.html"
         )
       );
       html = buffer.toString("utf-8");
     } else {
-      if (!this.devServerConfig) {
+      if (!devServerConfig) {
         vscode.window.showWarningMessage(
           "Development Server is not ready currently"
         );
         return;
       }
-      const { devServerConfig: devServer } = this;
-      const { port } = devServer;
+      const { port, hmrSocketPort } = devServerConfig;
       baseUrl = `http://localhost:${port}`;
       html = await new Promise((resolve, reject) => {
         http.get(baseUrl, (res) => {
@@ -73,12 +122,12 @@ export class WebviewManager implements vscode.Disposable {
             const resbonseBody = body
               .map((buffer) => buffer.toString("utf-8"))
               .join("");
-            if (devServer.hmrSocketPort) {
+            if (hmrSocketPort) {
               // Snowpack's HMR socket is calculated with `location.hostname` by default.
               // This is incorrect in vscode's webview.
               const withHmrSocketUrl = resbonseBody.replace(
                 "<!-- HMR SOCKET URL INJECTION DO NOT MODIFY -->",
-                `<script>window.HMR_WEBSOCKET_URL="ws://localhost:${devServer.hmrSocketPort}/"</script>`
+                `<script>window.HMR_WEBSOCKET_URL="ws://localhost:${hmrSocketPort}/"</script>`
               );
               resolve(withHmrSocketUrl);
             } else {
@@ -89,79 +138,62 @@ export class WebviewManager implements vscode.Disposable {
       });
     }
     // A <base> element with correct base url.
-    html = this.processUrlOfHtml(html, baseUrl);
+    html = processUrlOfHtml(html, baseUrl);
     // A <meta> element with hash is designed to ensure the webview to reload.
-    html = this.processHashOfHtml(html);
-    this.panel.webview.html = html;
+    html = processHashOfHtml(html);
+    panel.webview.html = html;
   }
-
-  close() {
-    if (!this.panel) {
+  function close() {
+    if (!panel) {
       return;
     }
-    this.detach();
-    this.panel.dispose();
-    this.panel = undefined;
+    detach();
+    panel.dispose();
+    panel = undefined;
   }
-  private attachResource?: vscode.Disposable;
-  attach(messageHandler: Parameters<vscode.Webview["onDidReceiveMessage"]>[0]) {
-    if (this.messageHandler) {
+  function attach(
+    handler: Parameters<vscode.Webview["onDidReceiveMessage"]>[0]
+  ) {
+    if (!messageHandler) {
       throw new Error("Cannot attach handler more than once!");
     }
-    if (!this.panel) {
+    if (!panel) {
       throw new Error("Please open webview first!");
     }
-    this.messageHandler = async (e) => {
-      if (!this.panel) {
+    messageHandler = async (e) => {
+      if (!panel) {
         return;
       }
-      const result = await messageHandler(json.parse(e));
-      !!result && this.panel.webview.postMessage(json.serialize(result));
+      const result = await handler(json.parse(e));
+      !!result && panel.webview.postMessage(json.serialize(result));
     };
-    this.attachResource = this.panel.webview.onDidReceiveMessage(
-      this.messageHandler
-    );
-    return this;
+    attachResource = panel.webview.onDidReceiveMessage(messageHandler);
+    return instance;
   }
-
-  detach() {
-    this.messageHandler = undefined;
-    this.attachResource?.dispose();
-    this.attachResource = undefined;
+  function detach() {
+    messageHandler = undefined;
+    attachResource?.dispose();
+    attachResource = undefined;
   }
-
-  dispose() {
-    this.close();
-    this.devServerConfig = undefined;
-  }
-
-  private processUrlOfHtml(html: string, baseUrl: string): string {
-    return html.replace("%BASE_URL%", baseUrl);
-  }
-
-  private processHashOfHtml(html: string): string {
-    return html.replace("%HASH%", +new Date() + "");
-  }
-
-  private staticFileUrlString(...paths: string[]): string {
-    return urlOfFile(
-      this.panel!,
-      this.context,
-      path.join(...env.STATIC_FILE_BASE_DIR_NAMES, ...paths)
-    );
-  }
-}
-
-function urlOfFile(
-  panel: vscode.WebviewPanel,
-  context: vscode.ExtensionContext,
-  relativePathToExtensionProject: string
-): string {
-  return panel.webview
-    .asWebviewUri(
-      vscode.Uri.file(
-        path.join(context.extensionPath, relativePathToExtensionProject)
-      )
-    )
-    .toString();
+  const instance: IWebviewManager = {
+    get context() {
+      return context;
+    },
+    get devServerConfig() {
+      return devServerConfig;
+    },
+    set devServerConfig(value) {
+      devServerConfig = value;
+    },
+    dispose() {
+      close();
+      devServerConfig = undefined;
+    },
+    open,
+    close,
+    reload,
+    attach,
+    detach,
+  };
+  return instance;
 }
