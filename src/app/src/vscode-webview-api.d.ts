@@ -1,8 +1,8 @@
 declare global {
   interface WebviewInjectedVSCodeAPI {
-    readonly postMessage: (params: any) => any;
-    readonly setState: (state: any) => void;
-    readonly getState: () => any;
+    readonly postMessage: (params: unknown) => unknown;
+    readonly setState: (state: unknown) => void;
+    readonly getState: () => unknown;
   }
 
   function acquireVsCodeApi(): WebviewInjectedVSCodeAPI;

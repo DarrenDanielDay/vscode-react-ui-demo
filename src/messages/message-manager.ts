@@ -2,24 +2,29 @@ import { globalModuleManager } from "../modules/module-manager";
 import { globalEventHubAdapter } from "../events/event-manager";
 import type { Event, Message, Request } from "../app/communication";
 
-function isMessage(obj: any): obj is Message<any> {
+function isMessage(obj: unknown): obj is Message<unknown> {
   return (
+    typeof obj === "object" &&
     !!obj &&
-    typeof obj.id === "number" &&
-    typeof obj.type === "string" &&
-    !!obj.payload
+    typeof Reflect.get(obj, "id") === "number" &&
+    typeof Reflect.get(obj, "type") === "string" &&
+    !!Reflect.get(obj, "payload")
   );
 }
-function isRequest(obj: any): obj is Request<any> {
+function isRequest(obj: unknown): obj is Request<unknown[]> {
   return (
-    isMessage(obj) && obj.type === "request" && Array.isArray(obj.payload.args)
+    isMessage(obj) &&
+    obj.type === "request" &&
+    typeof obj.payload === "object" &&
+    !!obj.payload &&
+    Array.isArray(Reflect.get(obj.payload, "args"))
   );
 }
-function isEvent(obj: any): obj is Event<any> {
+function isEvent(obj: unknown): obj is Event<unknown> {
   return isMessage(obj) && obj.type === "event";
 }
 
-export const globalMessageHandler = (e: any) => {
+export const globalMessageHandler = (e: unknown) => {
   if (isRequest(e)) {
     return globalModuleManager.requestHandler(e.payload.path, e);
   }

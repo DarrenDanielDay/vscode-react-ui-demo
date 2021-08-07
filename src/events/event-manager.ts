@@ -70,7 +70,7 @@ export function createDispatcher<T>(): IEventDispatcher<T> {
 export interface IEventHubAdapter extends vscode.Disposable {
   webviews: Set<vscode.Webview>;
   dispatcher: IEventDispatcher<CoreEvents>;
-  eventHandler: (event: Event<any>) => void;
+  eventHandler: (event: Event<unknown>) => void;
   attach(webview: vscode.Webview): void;
   detach(webview: vscode.Webview): void;
 }
@@ -78,13 +78,13 @@ export interface IEventHubAdapter extends vscode.Disposable {
 export function createEventHubAdapter(): IEventHubAdapter {
   const webviews = new Set<vscode.Webview>();
   const dispatcher = createDispatcher<CoreEvents>();
-  const eventHandler = (event: Event<any>) => {
+  const eventHandler = (event: Event<unknown>) => {
     // @ts-expect-error Cannot expect the name to be statically checked
     dispatcher.emit(event.name, event.payload);
   };
   dispatcher.onEach((name, payload) => {
     webviews.forEach((webview) => {
-      const event: Event<any> = {
+      const event: Event<unknown> = {
         id: 0,
         name,
         payload,

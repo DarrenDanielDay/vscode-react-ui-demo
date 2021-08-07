@@ -8,7 +8,7 @@ if (typeof acquireVsCodeApi !== "function") {
   );
   // Polyfill to prevent errors.
   (() => {
-    let _state: any;
+    let _state: unknown;
     window.acquireVsCodeApi = () => ({
       getState() {
         return _state;
@@ -27,7 +27,7 @@ window.vscodeAPI = acquireVsCodeApi();
 
 export interface PromiseHandler<T> {
   resolve(data: T): void;
-  reject(error?: any): void;
+  reject(error?: unknown): void;
 }
 
 export interface IMessageManager {
@@ -35,9 +35,9 @@ export interface IMessageManager {
     PropertyKeys<CoreEvents>,
     Set<(value: CoreEvents[PropertyKeys<CoreEvents>]) => void>
   >;
-  messageQueue: Map<number, PromiseHandler<any>>;
+  messageQueue: Map<number, PromiseHandler<unknown>>;
   readonly seq: number;
-  enqueue(handler: PromiseHandler<any>): number;
+  enqueue(handler: PromiseHandler<unknown>): number;
   accept(seq: number, payload: unknown): void;
   abort(seq: number, error?: unknown): void;
   request(path: string[], payload: unknown[]): Promise<Response<unknown>>;
@@ -58,7 +58,7 @@ export interface IMessageManager {
 
 export function createMessageManager(): IMessageManager {
   let _seq = 0;
-  const messageQueue = new Map<number, PromiseHandler<any>>();
+  const messageQueue = new Map<number, PromiseHandler<unknown>>();
   const handlerMap = new Map<
     PropertyKeys<CoreEvents>,
     Set<(value: CoreEvents[PropertyKeys<CoreEvents>]) => void>
@@ -88,17 +88,17 @@ export function createMessageManager(): IMessageManager {
       handler.call(undefined, payload);
     });
   }
-  function enqueue(handler: PromiseHandler<any>) {
+  function enqueue(handler: PromiseHandler<unknown>) {
     const nextSeq = getNextSeq();
     messageQueue.set(nextSeq, handler);
     return nextSeq;
   }
-  function accept(seq: number, payload: any) {
+  function accept(seq: number, payload: unknown) {
     const { resolve } = messageQueue.get(seq) ?? {};
     resolve?.(payload);
     messageQueue.delete(seq);
   }
-  function abort(seq: number, error?: any) {
+  function abort(seq: number, error?: unknown) {
     const { reject } = messageQueue.get(seq) ?? {};
     reject?.(error);
     messageQueue.delete(seq);

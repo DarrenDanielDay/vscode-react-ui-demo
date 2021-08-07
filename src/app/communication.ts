@@ -13,7 +13,11 @@ export interface Message<T> {
   payload: T;
 }
 
-export type AnyMessage = Request<any> | Response<any> | Event<any> | Error<any>;
+export type AnyMessage =
+  | Request<unknown[]>
+  | Response<unknown>
+  | Event<unknown>
+  | Error<unknown>;
 
 export interface RequestPayload<Args extends readonly unknown[]> {
   path: string[];
