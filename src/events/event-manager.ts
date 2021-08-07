@@ -108,5 +108,3 @@ export function createEventHubAdapter<T>(): IEventHubAdapter<T> {
     eventHandler,
   };
 }
-
-export const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();

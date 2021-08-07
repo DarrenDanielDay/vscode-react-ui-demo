@@ -1,15 +1,21 @@
 import * as vscode from "vscode";
 import env from "@esbuild-env";
 import { createWebviewManager, IWebviewManager } from "./webview-handler";
-import { globalModuleManager } from "./modules/module-manager";
-import { globalEventHubAdapter } from "./events/event-manager";
+import { createModuleManager } from "./modules/module-manager";
 import { Commands } from "./commands";
 import { loadSnowpackConfig } from "./debug/snowpack-dev";
 import { createCoreAPI } from "./modules/core-module";
-import { globalMessageHandler } from "./messages/message-manager";
+import { createEventHubAdapter } from "./events/event-manager";
+import type { CoreEvents } from "./app/message-protocol";
+import { createMessageHandler } from "./messages/message-manager";
 
 export function activate(context: vscode.ExtensionContext) {
-  globalModuleManager.useImpl(createCoreAPI());
+  const globalModuleManager = createModuleManager(createCoreAPI());
+  const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
+  const globalMessageHandler = createMessageHandler({
+    moduleManager: globalModuleManager,
+    eventAdapter: globalEventHubAdapter,
+  });
   const webviewManager = createWebviewManager(
     "ui",
     "Extension UI of React",

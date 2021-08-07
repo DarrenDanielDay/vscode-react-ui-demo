@@ -2,8 +2,8 @@ import ReactDOM from "react-dom";
 import React from "react";
 import { App } from "./app";
 import type { EventHub } from "../communication";
-import { globalMessageManager } from "./messager";
-
+import { createMessageManager } from "./messager";
+const globalMessageManager = createMessageManager();
 window.addEventListener("message", globalMessageManager.listener);
 const noop = () => {
   // Do nothing

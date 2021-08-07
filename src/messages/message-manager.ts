@@ -1,5 +1,5 @@
-import { globalModuleManager } from "../modules/module-manager";
-import { globalEventHubAdapter } from "../events/event-manager";
+import type { IModuleManager } from "../modules/module-manager";
+import type { IEventHubAdapter } from "../events/event-manager";
 import type { Event, Message, Request } from "../app/communication";
 
 function isMessage(obj: unknown): obj is Message<unknown> {
@@ -24,11 +24,19 @@ function isEvent(obj: unknown): obj is Event<unknown> {
   return isMessage(obj) && obj.type === "event";
 }
 
-export const globalMessageHandler = (e: unknown) => {
-  if (isRequest(e)) {
-    return globalModuleManager.requestHandler(e.payload.path, e);
-  }
-  if (isEvent(e)) {
-    return globalEventHubAdapter.eventHandler(e);
-  }
-};
+export function createMessageHandler<APIs, Events>({
+  eventAdapter,
+  moduleManager,
+}: {
+  moduleManager: IModuleManager<APIs>;
+  eventAdapter: IEventHubAdapter<Events>;
+}) {
+  return (e: unknown) => {
+    if (isRequest(e)) {
+      return moduleManager.requestHandler(e.payload.path, e);
+    }
+    if (isEvent(e)) {
+      return eventAdapter.eventHandler(e);
+    }
+  };
+}
