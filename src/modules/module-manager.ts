@@ -10,7 +10,7 @@ interface IModuleManager<T> {
   requestHandler: (
     path: string[],
     request: Request<unknown[]>
-  ) => Promise<Response<unknown> | Error<unknown>>;
+  ) => Promise<Error<unknown> | Response<unknown>>;
 }
 
 export function createModuleManager<T>(api: T): IModuleManager<T> {
@@ -20,7 +20,7 @@ export function createModuleManager<T>(api: T): IModuleManager<T> {
   const requestHandler = async (
     path: string[],
     request: Request<unknown[]>
-  ): Promise<Response<unknown> | Error<unknown>> => {
+  ): Promise<Error<unknown> | Response<unknown>> => {
     const { id, payload } = request;
     try {
       const data = await callModuleAPI(path, payload.args);
@@ -29,13 +29,15 @@ export function createModuleManager<T>(api: T): IModuleManager<T> {
         type: "response",
         id,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const newLocal =
+        error instanceof Error ? error.message : JSON.stringify(error);
       return {
         id,
         type: "error",
         payload: {
           error,
-          message: error?.message,
+          message: newLocal,
         },
       };
     }

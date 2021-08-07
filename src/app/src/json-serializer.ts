@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import type { DataTransferMiddleware } from "../communication";
 interface PrimitiveDescriber {
-  __$typeof$__: "symbol" | "bigint";
+  __$typeof$__: "bigint" | "symbol";
   literal: string;
 }
 const isPrimitiveDescriber = (obj: unknown): obj is PrimitiveDescriber => {
@@ -52,7 +53,7 @@ function serializeObject(value: object): object {
     return value.map((item) => json.serialize(item));
   }
   return getAllKeys(value).reduce((prev, curr) => {
-    const property = Reflect.get(value, curr);
+    const property: unknown = Reflect.get(value, curr);
     if (typeof property !== "function") {
       Reflect.set(prev, curr, json.serialize(property));
     }
@@ -64,7 +65,7 @@ function getAllKeys(obj: object): string[] {
   const keys = new Set<string>(
     Object.keys(Object.getOwnPropertyDescriptors(obj))
   );
-  let prototype = Object.getPrototypeOf(obj);
+  let prototype: unknown = Object.getPrototypeOf(obj);
   while (prototype !== null) {
     for (const key of Object.keys(
       Object.getOwnPropertyDescriptors(prototype)

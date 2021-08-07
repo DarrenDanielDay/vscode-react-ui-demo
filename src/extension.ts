@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
   const { open: doOpen, reload, close } = webviewManager;
   const open = function (this: IWebviewManager) {
     doOpen.call(this);
-    webviewManager.messageHandler ||
+    webviewManager.messageHandler ??
       webviewManager.attach(globalMessageHandler);
     globalEventHubAdapter.attach(webviewManager.panel!.webview);
   };

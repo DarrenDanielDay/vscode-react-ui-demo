@@ -20,11 +20,11 @@ export interface IWebviewManager extends vscode.Disposable {
   readonly context: vscode.ExtensionContext;
   panel?: vscode.WebviewPanel;
   messageHandler?: OnDidReceiveMessageHandler;
-  open(): Promise<void>;
-  reload(): Promise<void>;
-  close(): void;
-  attach(handler: OnDidReceiveMessageHandler): IWebviewManager;
-  detach(): void;
+  open: () => Promise<void>;
+  reload: () => Promise<void>;
+  close: () => void;
+  attach: (handler: OnDidReceiveMessageHandler) => IWebviewManager;
+  detach: () => void;
 }
 
 export function createWebviewManager(
@@ -40,7 +40,7 @@ export function createWebviewManager(
     return html.replace("%BASE_URL%", baseUrl);
   }
   function processHashOfHtml(html: string): string {
-    return html.replace("%HASH%", +new Date() + "");
+    return html.replace("%HASH%", new Date().getTime().toString());
   }
   function staticFileUrlString(
     panel: vscode.WebviewPanel,
@@ -117,7 +117,7 @@ export function createWebviewManager(
       html = await new Promise((resolve, reject) => {
         http.get(baseUrl, (res) => {
           const body: Buffer[] = [];
-          res.on("data", (chunk) => {
+          res.on("data", (chunk: Buffer) => {
             body.push(chunk);
           });
           res.on("end", () => {
@@ -164,7 +164,7 @@ export function createWebviewManager(
       if (!panel) {
         return;
       }
-      const result = await handler(json.parse(e));
+      const result: unknown = await handler(json.parse(e));
       !!result && panel.webview.postMessage(json.serialize(result));
     };
     attachResource = panel.webview.onDidReceiveMessage(messageHandler);

@@ -2,10 +2,11 @@ out/test/**
 src/**
 .gitignore
 .prettierignore
+.eslintrc
 .yarnrc
 .husky/**
 **/tsconfig.json
 **/*.map
 **/*.ts
 *.mjs
-**/node_modules
+src/app/node_modules

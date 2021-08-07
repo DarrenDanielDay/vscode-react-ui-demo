@@ -5,7 +5,7 @@ export interface DataTransferMiddleware {
   parse(value: unknown): unknown;
 }
 
-export type MessageType = "request" | "response" | "event" | "error";
+export type MessageType = "error" | "event" | "request" | "response";
 
 export interface Message<T> {
   type: MessageType;
@@ -14,10 +14,10 @@ export interface Message<T> {
 }
 
 export type AnyMessage =
-  | Request<unknown[]>
-  | Response<unknown>
+  | Error<unknown>
   | Event<unknown>
-  | Error<unknown>;
+  | Request<unknown[]>
+  | Response<unknown>;
 
 export interface RequestPayload<Args extends readonly unknown[]> {
   path: string[];
